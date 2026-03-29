@@ -1,0 +1,236 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Creator {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String?
+  googleId           String?   @unique
+  displayName        String?
+  primaryNiche       String?
+  secondaryNiche     String?
+  instagramHandle    String?
+  followerCountRange String?
+  primaryGoal        String?
+  onboardingComplete Boolean   @default(false)
+  encryptedApiKey    String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  sessions           Session[]
+  scripts            Script[]
+  streak             Streak?
+  reelSubmissions    ReelSubmission[]
+  savedHooks         SavedHook[]
+  analyticsSnapshots AnalyticsSnapshot[]
+  lessonCompletions  LessonCompletion[]
+  viralityPredictions ViralityPrediction[]
+  dailyMissions      DailyMission[]
+}
+
+model DailyMission {
+  id        String   @id @default(cuid())
+  creatorId String
+  date      String   // YYYY-MM-DD UTC
+  scriptId  String?  // reference to generated script
+  hook      String   // the mission hook
+  concept   String   // the mission concept
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, date])
+  @@index([creatorId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  creatorId    String
+  refreshToken String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  creator      Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+}
+
+model Script {
+  id        String   @id @default(cuid())
+  creatorId String
+  date      String
+  scripts   Json
+  createdAt DateTime @default(now())
+
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, date])
+}
+
+model Streak {
+  id             String   @id @default(cuid())
+  creatorId      String   @unique
+  current        Int      @default(0)
+  highest        Int      @default(0)
+  lastActionDate String?
+  milestones     Json     @default("[]")
+  updatedAt      DateTime @updatedAt
+
+  creator        Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+}
+
+model ReelSubmission {
+  id          String   @id @default(cuid())
+  creatorId   String
+  url         String
+  feedback    Json?
+  submittedAt DateTime @default(now())
+
+  creator     Creator             @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  prediction  ViralityPrediction?
+}
+
+model ViralityPrediction {
+  id               String         @id @default(cuid())
+  creatorId        String
+  reelSubmissionId String         @unique
+  score            Int
+  reachMin         Int
+  reachMax         Int
+  suggestions      Json
+  createdAt        DateTime       @default(now())
+
+  creator          Creator        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  reelSubmission   ReelSubmission @relation(fields: [reelSubmissionId], references: [id], onDelete: Cascade)
+}
+
+model Trend {
+  id                    String   @id @default(cuid())
+  title                 String
+  description           String
+  exampleFormat         String
+  engagementLiftPercent Float
+  niche                 String
+  updatedAt             DateTime @updatedAt
+  createdAt             DateTime @default(now())
+}
+
+model TrendSignal {
+  id              String   @id @default(cuid())
+  niche           String
+  hook            String
+  caption         String?
+  formatType      String   // talking_head, voiceover, mixed, screen_recording, aesthetic
+  structureType   String   // problem_solution, story, before_after, list, tutorial, pov
+  engagementScore Float    @default(0)
+  source          String   @default("manual") // manual, external, ai_detected
+  createdAt       DateTime @default(now())
+
+  @@index([niche])
+  @@index([engagementScore])
+}
+
+model TrendPattern {
+  id            String   @id @default(cuid())
+  niche         String
+  hookTemplate  String   // e.g. "This [mistake] cost me [time]..."
+  hookType      String   // curiosity, mistake, pov, list, storytelling, bold_claim, controversy
+  structureType String   // problem_solution, story, before_after, list, tutorial
+  emotionType   String   // fear, curiosity, humor, relatability, inspiration, shock
+  formatType    String   // talking_head, voiceover, mixed, screen_recording
+  trendScore    Float    @default(0)
+  clusterId     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  cluster       TrendCluster? @relation(fields: [clusterId], references: [id])
+
+  @@index([niche, trendScore])
+}
+
+model TrendCluster {
+  id            String   @id @default(cuid())
+  name          String   // e.g. "Mistake-Based DevOps Content"
+  niche         String
+  description   String?
+  strength      Float    @default(0) // aggregate trend score
+  growthPercent Float    @default(0) // growth rate
+  exampleHooks  String[] // sample hooks in this cluster
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  patterns      TrendPattern[]
+
+  @@index([niche, strength])
+}
+
+model Hook {
+  id             String      @id @default(cuid())
+  content        String
+  niches         String[]
+  relevanceScore Float       @default(0)
+  createdAt      DateTime    @default(now())
+
+  savedBy        SavedHook[]
+}
+
+model SavedHook {
+  id        String   @id @default(cuid())
+  creatorId String
+  hookId    String
+  savedAt   DateTime @default(now())
+
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  hook      Hook     @relation(fields: [hookId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, hookId])
+}
+
+model AnalyticsSnapshot {
+  id                    String   @id @default(cuid())
+  creatorId             String
+  followerCount         Int
+  followerGrowth7d      Int
+  followerGrowth30d     Int
+  postingConsistency30d Float
+  snapshotAt            DateTime @default(now())
+
+  creator               Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+}
+
+model MonetizationModule {
+  id      String               @id @default(cuid())
+  title   String
+  order   Int
+  lessons MonetizationLesson[]
+}
+
+model MonetizationLesson {
+  id               String             @id @default(cuid())
+  moduleId         String
+  title            String
+  body             String
+  estimatedReadMin Int
+  order            Int
+  audienceLevel    String
+
+  module           MonetizationModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  completions      LessonCompletion[]
+}
+
+model LessonCompletion {
+  id          String             @id @default(cuid())
+  creatorId   String
+  lessonId    String
+  completedAt DateTime           @default(now())
+
+  creator     Creator            @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  lesson      MonetizationLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, lessonId])
+}

@@ -1,0 +1,17 @@
+{
+  "name": "viraly",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "db:generate": "yarn workspace @viraly/db prisma generate",
+    "db:migrate": "yarn workspace @viraly/db prisma migrate dev",
+    "db:studio": "yarn workspace @viraly/db prisma studio"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
