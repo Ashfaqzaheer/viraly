@@ -138,3 +138,47 @@ npx jest --testPathPattern="virality"  # Virality prediction tests
 ## License
 
 Private — All rights reserved.
+
+## Run with Docker
+
+The entire stack can be started with a single command:
+
+```bash
+docker-compose up --build
+```
+
+This starts all 5 services:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| Frontend | http://localhost:3000 | Next.js app |
+| API | http://localhost:3001 | Express server |
+| AI | http://localhost:8000 | FastAPI service |
+| PostgreSQL | localhost:5433 | Database |
+| Redis | localhost:6379 | Cache |
+
+To run database migrations and seed after first start:
+
+```bash
+docker-compose exec api npx prisma migrate deploy --schema=packages/db/prisma/schema.prisma
+docker-compose exec api npx ts-node packages/db/prisma/seed.ts
+```
+
+To stop:
+
+```bash
+docker-compose down
+```
+
+To stop and remove data:
+
+```bash
+docker-compose down -v
+```
+
+Optional env vars (create `.env` in project root):
+
+```env
+AI_PROVIDER_KEY=sk-your-openai-key
+JWT_SECRET=your-production-secret
+```
