@@ -38,7 +38,7 @@ export default function GlassCard3D({ children, className = '', glareColor = 'rg
   return (
     <div ref={cardRef} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}
       className={`relative overflow-hidden transition-[box-shadow] duration-500 ease-premium ${className}`}
-      style={{ transformStyle: 'preserve3d', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+      style={{ transformStyle: 'preserve-3d', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
       {/* Glare overlay */}
       <div ref={glareRef} className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-300" />
       {children}
