@@ -15,11 +15,17 @@ export default function TrendsPage() {
   const [loading, setLoading] = useState(true)
   const [niche, setNiche] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [isFallback, setIsFallback] = useState(false)
 
   useEffect(() => {
     async function load() {
       setLoading(true); setError(null)
-      try { const q = niche ? `?niche=${encodeURIComponent(niche)}` : ''; setTrends((await apiFetch<{ trends: Trend[] }>(`/trends${q}`, getToken)).trends) }
+      try {
+        const q = niche ? `?niche=${encodeURIComponent(niche)}` : ''
+        const res = await apiFetch<{ trends: Trend[]; isFallback?: boolean }>(`/trends${q}`, getToken)
+        setTrends(res.trends)
+        setIsFallback(res.isFallback ?? false)
+      }
       catch (err) { setError(err instanceof Error ? err.message : 'Failed to load trends') }
       finally { setLoading(false) }
     }
@@ -45,6 +51,12 @@ export default function TrendsPage() {
         </div>
 
         {error && <div role="alert" className="mb-6 glass rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
+
+        {isFallback && !loading && trends.length > 0 && (
+          <div className="mb-4 glass rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+            <p className="text-xs text-amber-300">🔥 Showing recent trends (auto-refresh pending)</p>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center gap-3 justify-center py-12"><span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin" /><span className="text-sm text-white/40">Loading trends...</span></div>

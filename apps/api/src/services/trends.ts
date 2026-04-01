@@ -56,11 +56,12 @@ function toTrend(record: {
 }
 
 /**
- * Returns non-stale trends, optionally filtered by niche.
+ * Returns trends, optionally filtered by niche.
+ * Strategy: try fresh trends first (<48h), fallback to latest available if none fresh.
+ * Never returns empty if data exists in DB.
  * Serves from Redis cache (key: trends:{niche|all}, TTL: 1 hour).
- * Requirements: 7.1, 7.3, 7.4, 7.5
  */
-export async function getTrends(niche?: string): Promise<Trend[]> {
+export async function getTrends(niche?: string): Promise<{ trends: Trend[]; isFallback: boolean }> {
   const cacheKey = niche ? `trends:${niche}` : 'trends:all'
   const redis = getRedisClient()
 
@@ -68,34 +69,47 @@ export async function getTrends(niche?: string): Promise<Trend[]> {
   try {
     const cached = await redis.get(cacheKey)
     if (cached) {
-      return JSON.parse(cached) as Trend[]
+      const parsed = JSON.parse(cached) as { trends: Trend[]; isFallback: boolean }
+      // Handle old cache format (plain array)
+      if (Array.isArray(parsed)) return { trends: parsed, isFallback: false }
+      return parsed
     }
   } catch {
     // Redis unavailable — fall through to DB query
   }
 
-  // Requirement 7.4: filter out stale records (updatedAt > 48h ago)
+  const nicheFilter = niche ? { niche } : {}
+
+  // Try fresh trends first (<48h)
   const cutoff = new Date(Date.now() - STALE_THRESHOLD_MS)
+  const freshRecords = await prisma.trend.findMany({
+    where: { updatedAt: { gte: cutoff }, ...nicheFilter },
+    orderBy: { updatedAt: 'desc' },
+  })
 
-  const where: { updatedAt: { gte: Date }; niche?: string } = {
-    updatedAt: { gte: cutoff },
+  let trends: Trend[]
+  let isFallback = false
+
+  if (freshRecords.length > 0) {
+    trends = freshRecords.map(toTrend)
+  } else {
+    // Fallback: return latest trends regardless of age
+    const fallbackRecords = await prisma.trend.findMany({
+      where: nicheFilter,
+      orderBy: { updatedAt: 'desc' },
+      take: 20,
+    })
+    trends = fallbackRecords.map(toTrend)
+    isFallback = trends.length > 0
   }
-
-  if (niche) {
-    where.niche = niche
-  }
-
-  const records = await prisma.trend.findMany({ where, orderBy: { updatedAt: 'desc' } })
-  const trends = records.map(toTrend)
 
   // Populate cache
+  const result = { trends, isFallback }
   try {
-    await redis.set(cacheKey, JSON.stringify(trends), 'EX', TREND_CACHE_TTL)
-  } catch {
-    // Non-fatal: cache failure doesn't break the response
-  }
+    await redis.set(cacheKey, JSON.stringify(result), 'EX', TREND_CACHE_TTL)
+  } catch { /* non-fatal */ }
 
-  return trends
+  return result
 }
 
 /**

@@ -22,8 +22,8 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 
   const niche = typeof req.query.niche === 'string' ? req.query.niche : undefined
 
-  const trends = await getTrends(niche)
-  res.status(200).json({ trends })
+  const { trends, isFallback } = await getTrends(niche)
+  res.status(200).json({ trends, isFallback })
 })
 
 export default router
