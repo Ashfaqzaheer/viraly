@@ -139,15 +139,15 @@ npx jest --testPathPattern="virality"  # Virality prediction tests
 
 Private — All rights reserved.
 
-## Run with Docker
+## Run with Docker (One-Command Setup)
 
-The entire stack can be started with a single command:
+Run the entire system with zero manual setup:
 
 ```bash
 docker-compose up --build
 ```
 
-This starts all 5 services:
+That's it. Database migrations and seed data run automatically on first start.
 
 | Service | URL | Description |
 |---------|-----|-------------|
@@ -157,12 +157,11 @@ This starts all 5 services:
 | PostgreSQL | localhost:5433 | Database |
 | Redis | localhost:6379 | Cache |
 
-To run database migrations and seed after first start:
-
-```bash
-docker-compose exec api npx prisma migrate deploy --schema=packages/db/prisma/schema.prisma
-docker-compose exec api npx ts-node packages/db/prisma/seed.ts
-```
+What happens automatically:
+- PostgreSQL and Redis start with healthchecks
+- API waits for DB to be healthy, then runs `prisma migrate deploy` + seed
+- All 61 hooks, 12 trends, 44 trend signals, 14 clusters, 33 patterns, and 4 monetization modules are seeded
+- Frontend connects to API on port 3001
 
 To stop:
 
@@ -170,15 +169,23 @@ To stop:
 docker-compose down
 ```
 
-To stop and remove data:
+To stop and wipe all data:
 
 ```bash
 docker-compose down -v
 ```
 
-Optional env vars (create `.env` in project root):
+Optional env vars (create `.env` in project root for real API keys):
 
 ```env
 AI_PROVIDER_KEY=sk-your-openai-key
 JWT_SECRET=your-production-secret
+RAZORPAY_KEY_ID=rzp_test_xxx
+RAZORPAY_KEY_SECRET=xxx
 ```
+
+Notes:
+- Without `AI_PROVIDER_KEY`, AI features run in mock mode (realistic fake data)
+- Without `RAZORPAY_KEY_ID`, payment routes return "not configured" gracefully
+- Without `VAPID_*` keys, push notifications are disabled (no crash)
+
