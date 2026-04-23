@@ -1,30 +1,22 @@
 import { Router, Request, Response } from 'express'
-import Redis from 'ioredis'
 import { prisma } from '@viraly/db'
+import redis from '../lib/redis'
 import { recordDailyAction, getStreak } from '../services/streak'
 import { buildTrendContext } from '../services/trendEngine'
 
 const router = Router()
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL ?? 'http://localhost:8000'
-const AI_TIMEOUT_MS = 10_000 // 10 second timeout for AI requests
-const STREAK_UNLOCK_SCRIPTS = 3 // Day 3 streak unlocks script 2
+const AI_TIMEOUT_MS = 10_000
+const STREAK_UNLOCK_SCRIPTS = 3
 
-let redisClient: Redis | null = null
-function getRedisClient(): Redis {
-  if (!redisClient) {
-    redisClient = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { lazyConnect: true })
-  }
-  return redisClient
+function todayUTC(): string {
+  return new Date().toISOString().slice(0, 10)
 }
 
 function secondsUntilMidnightUTC(): number {
   const now = new Date()
   const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1))
   return Math.ceil((midnight.getTime() - now.getTime()) / 1000)
-}
-
-function todayUTC(): string {
-  return new Date().toISOString().slice(0, 10)
 }
 
 // ── Step 1: Initial script (1 result) ────────────────────────────────────────
@@ -174,8 +166,8 @@ router.post('/guide', async (req: Request, res: Response): Promise<void> => {
   // Persist the guide
   const date = todayUTC()
   const cacheKey = `scripts:${creatorId}:${date}`
-  const redis = getRedisClient()
-  await persistAndCache({ creatorId, date, scripts: [guide], cacheKey, redis })
+  
+  await persistAndCache({ creatorId, date, scripts: [guide], cacheKey })
   await recordDailyAction(creatorId).catch((err) => { console.error('[scripts/guide] streak record failed:', err) })
 
   res.status(200).json({ guide })
@@ -220,7 +212,7 @@ router.get('/daily', async (req: Request, res: Response): Promise<void> => {
   const idea = (req.query.idea as string | undefined)?.trim() || undefined
   const date = todayUTC()
   const cacheKey = `scripts:${creatorId}:${date}`
-  const redis = getRedisClient()
+  
 
   if (!idea) {
     try {
@@ -246,16 +238,16 @@ router.get('/daily', async (req: Request, res: Response): Promise<void> => {
   }
 
   const { scripts } = await aiResponse.json() as { scripts: unknown[] }
-  await persistAndCache({ creatorId, date, scripts, cacheKey, redis })
+  await persistAndCache({ creatorId, date, scripts, cacheKey })
   await recordDailyAction(creatorId).catch((err) => { console.error('[scripts/daily] streak record failed:', err) })
   res.status(200).json({ date, scripts, cached: false })
 })
 
 // ── Shared helper ────────────────────────────────────────────────────────────
 export async function persistAndCache(params: {
-  creatorId: string; date: string; scripts: unknown[]; cacheKey: string; redis: Redis
+  creatorId: string; date: string; scripts: unknown[]; cacheKey: string
 }): Promise<void> {
-  const { creatorId, date, scripts, cacheKey, redis } = params
+  const { creatorId, date, scripts, cacheKey } = params
   const scriptsJson = scripts as import('@prisma/client').Prisma.InputJsonValue
   await prisma.script.upsert({
     where: { creatorId_date: { creatorId, date } },

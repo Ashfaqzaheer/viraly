@@ -62,10 +62,9 @@ interface TrendRadarData {
 // ── Virality score helper (derived from trend data) ──────────────────────────
 
 function getViralityScore(script: DeepScript): string {
-  const base = script.trendBased ? 7.5 : 6.0
-  const bonus = script.scenes?.length > 3 ? 0.8 : 0
-  const hookBonus = script.hook.length > 20 ? 0.5 : 0
-  return Math.min(10, base + bonus + hookBonus).toFixed(1)
+  // Real score comes from AI analysis — show trend indicator instead of fake number
+  if (script.trendBased) return 'Trending'
+  return 'New'
 }
 
 function getDifficulty(script: DeepScript): string {
@@ -461,7 +460,7 @@ function LightScriptCard({ script, badge, onViewGuide }: {
       {/* Style + Virality Score row */}
       <div className="flex items-center gap-3 mb-4">
         <span className="inline-flex items-center rounded-lg bg-violet-500/10 border border-violet-500/15 px-2.5 py-1 text-xs text-violet-300">{"\u{1F3A4}"} {style}</span>
-        <span className="inline-flex items-center rounded-lg bg-amber-500/10 border border-amber-500/15 px-2.5 py-1 text-xs text-amber-300">{"\u2B50"} {viralityScore} / 10</span>
+        <span className="inline-flex items-center rounded-lg bg-amber-500/10 border border-amber-500/15 px-2.5 py-1 text-xs text-amber-300">{viralityScore === 'Trending' ? '🔥 Trending' : '✨ New'}</span>
       </div>
 
       {/* Quick Overview */}

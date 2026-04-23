@@ -13,37 +13,6 @@ interface Module { id: string; title: string; lessons: Lesson[]; completionPerce
 
 type Tab = 'learn' | 'earnings' | 'sponsors' | 'payouts'
 
-// Mock earnings data (would come from API in production)
-const EARNINGS_DATA = {
-  totalEarnings: 2847.50,
-  thisMonth: 645.00,
-  lastMonth: 892.30,
-  growth: 12.5,
-  sources: [
-    { name: 'Affiliate Links', amount: 1245.00, icon: '🔗', color: 'from-violet-500 to-purple-500', percent: 44 },
-    { name: 'Brand Deals', amount: 1102.50, icon: '🤝', color: 'from-cyan-500 to-blue-500', percent: 39 },
-    { name: 'Digital Products', amount: 500.00, icon: '📦', color: 'from-emerald-500 to-teal-500', percent: 17 },
-  ],
-  monthly: [
-    { month: 'Oct', amount: 320 }, { month: 'Nov', amount: 480 }, { month: 'Dec', amount: 560 },
-    { month: 'Jan', amount: 720 }, { month: 'Feb', amount: 892 }, { month: 'Mar', amount: 645 },
-  ]
-}
-
-const SPONSORS = [
-  { id: '1', brand: 'FitGear Pro', status: 'active' as const, deal: '$500/post', posts: 3, remaining: 2, logo: '💪', startDate: '2026-01-15', endDate: '2026-04-15' },
-  { id: '2', brand: 'NutriBlend', status: 'negotiating' as const, deal: '$300/post', posts: 0, remaining: 5, logo: '🥤', startDate: '2026-03-01', endDate: '2026-06-01' },
-  { id: '3', brand: 'TechWear Co', status: 'completed' as const, deal: '$250/post', posts: 4, remaining: 0, logo: '👕', startDate: '2025-10-01', endDate: '2026-01-01' },
-  { id: '4', brand: 'MindfulApp', status: 'active' as const, deal: '$400/post', posts: 1, remaining: 4, logo: '🧘', startDate: '2026-02-01', endDate: '2026-05-01' },
-]
-
-const PAYOUTS = [
-  { id: '1', amount: 892.30, date: '2026-02-28', status: 'completed' as const, method: 'Bank Transfer' },
-  { id: '2', amount: 720.00, date: '2026-01-31', status: 'completed' as const, method: 'Bank Transfer' },
-  { id: '3', amount: 560.00, date: '2025-12-31', status: 'completed' as const, method: 'PayPal' },
-  { id: '4', amount: 645.00, date: '2026-03-31', status: 'pending' as const, method: 'Bank Transfer' },
-]
-
 const TABS: { key: Tab; label: string; icon: string }[] = [
   { key: 'learn', label: 'Learn', icon: '📚' },
   { key: 'earnings', label: 'Earnings', icon: '💰' },
@@ -194,191 +163,33 @@ export default function MonetizationPage() {
 
         {/* Earnings tab */}
         {tab === 'earnings' && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Top cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="vault-glass gold-accent rounded-xl p-4">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Total Earnings</p>
-                <p className="text-xl font-bold gold-text">${EARNINGS_DATA.totalEarnings.toLocaleString()}</p>
-              </div>
-              <div className="glass-strong rounded-xl p-4">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">This Month</p>
-                <p className="text-xl font-bold text-white">${EARNINGS_DATA.thisMonth.toLocaleString()}</p>
-              </div>
-              <div className="glass-strong rounded-xl p-4">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Last Month</p>
-                <p className="text-xl font-bold text-white/60">${EARNINGS_DATA.lastMonth.toLocaleString()}</p>
-              </div>
-              <div className="glass-strong rounded-xl p-4">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Growth</p>
-                <p className="text-xl font-bold text-emerald-400">+{EARNINGS_DATA.growth}%</p>
-              </div>
-            </div>
-
-            {/* Revenue chart (simple bar chart) */}
-            <div className="glass-strong rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-white mb-4">Monthly Revenue</h2>
-              <div className="flex items-end gap-3 h-40">
-                {EARNINGS_DATA.monthly.map((m, i) => {
-                  const maxAmt = Math.max(...EARNINGS_DATA.monthly.map(x => x.amount))
-                  const height = (m.amount / maxAmt) * 100
-                  const isLast = i === EARNINGS_DATA.monthly.length - 1
-                  return (
-                    <div key={m.month} className="flex-1 flex flex-col items-center gap-2">
-                      <span className="text-xs text-white/50 font-medium">${m.amount}</span>
-                      <div className={`w-full rounded-t-lg transition-all duration-500 ${
-                        isLast ? 'bg-gradient-to-t from-violet-500 to-cyan-500' : 'bg-white/10'
-                      }`} style={{ height: `${height}%` }} />
-                      <span className="text-[10px] text-white/30">{m.month}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Revenue sources */}
-            <div className="glass-strong rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-white mb-4">Revenue Sources</h2>
-              <div className="space-y-4">
-                {EARNINGS_DATA.sources.map(src => (
-                  <div key={src.name}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span>{src.icon}</span>
-                        <span className="text-sm font-medium text-white/70">{src.name}</span>
-                      </div>
-                      <span className="text-sm font-bold text-white">${src.amount.toLocaleString()} <span className="text-white/30 font-normal">({src.percent}%)</span></span>
-                    </div>
-                    <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-                      <div className={`bg-gradient-to-r ${src.color} h-2 rounded-full transition-all duration-700`} style={{ width: `${src.percent}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="glass-strong rounded-2xl p-10 text-center animate-fade-in">
+            <div className="text-4xl mb-4">💰</div>
+            <h3 className="text-lg font-semibold text-white mb-2">Earnings Tracking Coming Soon</h3>
+            <p className="text-sm text-white/40 max-w-md mx-auto mb-4">Connect your monetization platforms to track real earnings, affiliate revenue, and brand deal income.</p>
+            <span className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs text-amber-300">🚧 In Development</span>
           </div>
         )}
 
         {/* Sponsors tab */}
         {tab === 'sponsors' && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="glass-strong rounded-xl p-4 text-center">
-                <p className="text-2xl font-bold text-white">{SPONSORS.filter(s => s.status === 'active').length}</p>
-                <p className="text-[10px] text-white/40 uppercase tracking-wider mt-1">Active</p>
-              </div>
-              <div className="glass-strong rounded-xl p-4 text-center">
-                <p className="text-2xl font-bold text-amber-400">{SPONSORS.filter(s => s.status === 'negotiating').length}</p>
-                <p className="text-[10px] text-white/40 uppercase tracking-wider mt-1">Negotiating</p>
-              </div>
-              <div className="glass-strong rounded-xl p-4 text-center">
-                <p className="text-2xl font-bold text-white/40">{SPONSORS.filter(s => s.status === 'completed').length}</p>
-                <p className="text-[10px] text-white/40 uppercase tracking-wider mt-1">Completed</p>
-              </div>
-            </div>
-
-            {/* Sponsor cards */}
-            <div className="space-y-3">
-              {SPONSORS.map(sponsor => (
-                <div key={sponsor.id} className="glass-strong rounded-xl p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-xl">{sponsor.logo}</div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">{sponsor.brand}</p>
-                        <p className="text-xs text-white/40">{sponsor.deal}</p>
-                      </div>
-                    </div>
-                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider ${
-                      sponsor.status === 'active' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                        : sponsor.status === 'negotiating' ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
-                        : 'bg-white/5 border border-white/10 text-white/40'
-                    }`}>{sponsor.status}</span>
-                  </div>
-                  <div className="mt-4 flex items-center gap-4 text-xs text-white/40">
-                    <span>📅 {new Date(sponsor.startDate).toLocaleDateString()} – {new Date(sponsor.endDate).toLocaleDateString()}</span>
-                    <span>📸 {sponsor.posts} posted</span>
-                    {sponsor.remaining > 0 && <span className="text-violet-400">{sponsor.remaining} remaining</span>}
-                  </div>
-                  {sponsor.status === 'active' && sponsor.remaining > 0 && (
-                    <div className="mt-3">
-                      <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-gradient-to-r from-violet-500 to-cyan-500 h-1.5 rounded-full transition-all duration-700"
-                          style={{ width: `${(sponsor.posts / (sponsor.posts + sponsor.remaining)) * 100}%` }} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className="glass-strong rounded-2xl p-10 text-center animate-fade-in">
+            <div className="text-4xl mb-4">🤝</div>
+            <h3 className="text-lg font-semibold text-white mb-2">Sponsor Management Coming Soon</h3>
+            <p className="text-sm text-white/40 max-w-md mx-auto mb-4">Track brand deals, manage sponsorship pipelines, and organize your collaborations in one place.</p>
+            <span className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs text-amber-300">🚧 In Development</span>
           </div>
         )}
 
         {/* Payouts tab */}
         {tab === 'payouts' && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Payout summary */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="glass-strong rounded-xl p-5">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Available Balance</p>
-                <p className="text-2xl font-bold gradient-text">${EARNINGS_DATA.thisMonth.toLocaleString()}</p>
-                <button className="btn-premium rounded-lg px-4 py-2 text-xs font-semibold text-white mt-3 w-full">
-                  Request Payout
-                </button>
-              </div>
-              <div className="glass-strong rounded-xl p-5">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Total Paid Out</p>
-                <p className="text-2xl font-bold text-white">
-                  ${PAYOUTS.filter(p => p.status === 'completed').reduce((s, p) => s + p.amount, 0).toLocaleString()}
-                </p>
-                <p className="text-xs text-white/30 mt-3">{PAYOUTS.filter(p => p.status === 'completed').length} payouts completed</p>
-              </div>
-            </div>
-
-            {/* Payout history */}
-            <div className="glass-strong rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-white mb-4">Payout History</h2>
-              <div className="space-y-2">
-                {PAYOUTS.map(payout => (
-                  <div key={payout.id} className="flex items-center justify-between glass rounded-xl px-4 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${
-                        payout.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                      }`}>
-                        {payout.status === 'completed' ? '✓' : '⏳'}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">${payout.amount.toLocaleString()}</p>
-                        <p className="text-xs text-white/30">{payout.method} · {new Date(payout.date).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider ${
-                      payout.status === 'completed'
-                        ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                        : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
-                    }`}>{payout.status}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Payment method */}
-            <div className="glass-strong rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-white mb-4">Payment Method</h2>
-              <div className="flex items-center justify-between glass rounded-xl px-4 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-lg">🏦</div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Bank Transfer</p>
-                    <p className="text-xs text-white/30">****4829 · Primary</p>
-                  </div>
-                </div>
-                <button className="text-xs text-violet-400 hover:text-violet-300 transition">Edit</button>
-              </div>
-            </div>
+          <div className="glass-strong rounded-2xl p-10 text-center animate-fade-in">
+            <div className="text-4xl mb-4">💳</div>
+            <h3 className="text-lg font-semibold text-white mb-2">Payout History Coming Soon</h3>
+            <p className="text-sm text-white/40 max-w-md mx-auto mb-4">View your payout history, manage payment methods, and track pending transfers.</p>
+            <span className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs text-amber-300">🚧 In Development</span>
           </div>
-        )}
+                )}
       </main>
     </div>
   )

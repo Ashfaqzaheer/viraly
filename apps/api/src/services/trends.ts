@@ -2,22 +2,12 @@
  * Trend Radar service — getTrends and refreshTrends.
  * Requirements: 7.1, 7.3, 7.4, 7.5
  */
-import Redis from 'ioredis'
 import { prisma } from '@viraly/db'
+import redis from '../lib/redis'
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL ?? 'http://localhost:8000'
-const TREND_CACHE_TTL = 3600 // 1 hour in seconds
-const STALE_THRESHOLD_MS = 48 * 60 * 60 * 1000 // 48 hours in milliseconds
-
-let redisClient: Redis | null = null
-
-function getRedisClient(): Redis {
-  if (!redisClient) {
-    const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379'
-    redisClient = new Redis(redisUrl, { lazyConnect: true })
-  }
-  return redisClient
-}
+const TREND_CACHE_TTL = 3600
+const STALE_THRESHOLD_MS = 48 * 60 * 60 * 1000
 
 export interface Trend {
   id: string
@@ -63,7 +53,7 @@ function toTrend(record: {
  */
 export async function getTrends(niche?: string): Promise<{ trends: Trend[]; isFallback: boolean }> {
   const cacheKey = niche ? `trends:${niche}` : 'trends:all'
-  const redis = getRedisClient()
+  
 
   // Check cache first
   try {
@@ -160,7 +150,7 @@ export async function refreshTrends(): Promise<void> {
   }
 
   // Invalidate all trends:* cache keys
-  const redis = getRedisClient()
+  
   try {
     // Delete known keys: trends:all plus any niche-specific keys
     const keys = await redis.keys('trends:*')

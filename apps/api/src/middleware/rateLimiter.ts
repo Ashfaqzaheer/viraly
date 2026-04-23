@@ -1,23 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
-import Redis from 'ioredis'
+import redis from '../lib/redis'
 
 const WINDOW_SECONDS = 60
 const MAX_REQUESTS = 100
-
-let redisClient: Redis | null = null
-
-function getRedisClient(): Redis {
-  if (!redisClient) {
-    const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379'
-    redisClient = new Redis(redisUrl, { lazyConnect: true })
-  }
-  return redisClient
-}
-
-/** Reset the cached Redis client (for testing). */
-export function _resetRedisClient(): void {
-  redisClient = null
-}
 
 /**
  * Redis sliding window rate limiter.
@@ -31,7 +16,7 @@ export async function rateLimiter(req: Request, res: Response, next: NextFunctio
     return next()
   }
 
-  const redis = getRedisClient()
+  
   const key = `ratelimit:${creatorId}`
   const now = Date.now()
   const windowStart = now - WINDOW_SECONDS * 1000

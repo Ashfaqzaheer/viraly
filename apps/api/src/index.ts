@@ -1,6 +1,6 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
-import Redis from 'ioredis'
+import redis from './lib/redis'
 import { httpsEnforcement } from './middleware/https'
 import { createCorsMiddleware } from './middleware/cors'
 import { jwtVerification } from './middleware/jwt'
@@ -19,8 +19,6 @@ import monetizationRouter from './routes/monetization'
 import missionRouter from './routes/mission'
 import { scheduleStreakResetJob } from './jobs/streakReset'
 import { scheduleTrendsRefreshJob } from './jobs/trendsRefresh'
-
-const redisClient = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { lazyConnect: true })
 
 const app = express()
 const PORT = process.env.PORT ?? 3001
@@ -54,7 +52,7 @@ app.use('/reel', reelRouter)
 app.use('/virality', viralityRouter)
 app.use('/trends', trendsRouter)
 app.use('/hooks', hooksRouter)
-app.use('/analytics', createAnalyticsRouter(redisClient))
+app.use('/analytics', createAnalyticsRouter(redis))
 app.use('/monetization', monetizationRouter)
 app.use('/mission', missionRouter)
 
