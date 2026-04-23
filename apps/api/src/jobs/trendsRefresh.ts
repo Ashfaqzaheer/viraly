@@ -8,9 +8,9 @@ import { refreshTrends } from '../services/trends'
  * Requirements: 7.1, 7.5
  */
 export function scheduleTrendsRefreshJob(): void {
-  // '0 0 * * *' = at 00:00 every day; timezone UTC
-  cron.schedule('0 0 * * *', async () => {
-    console.log('[trendsRefresh] Running daily trend refresh...')
+  // '0 */12 * * *' = every 12 hours at :00
+  cron.schedule('0 */12 * * *', async () => {
+    console.log('[trendsRefresh] Running trend refresh...')
     try {
       await refreshTrends()
       console.log('[trendsRefresh] Trend refresh complete.')

@@ -17,8 +17,11 @@ import hooksRouter from './routes/hooks'
 import createAnalyticsRouter from './routes/analytics'
 import monetizationRouter from './routes/monetization'
 import missionRouter from './routes/mission'
+import paymentRouter from './routes/payment'
+import pushRouter from './routes/push'
 import { scheduleStreakResetJob } from './jobs/streakReset'
 import { scheduleTrendsRefreshJob } from './jobs/trendsRefresh'
+import { scheduleStreakReminderJob } from './jobs/streakReminder'
 
 const app = express()
 const PORT = process.env.PORT ?? 3001
@@ -55,6 +58,8 @@ app.use('/hooks', hooksRouter)
 app.use('/analytics', createAnalyticsRouter(redis))
 app.use('/monetization', monetizationRouter)
 app.use('/mission', missionRouter)
+app.use('/payment', paymentRouter)
+app.use('/push', pushRouter)
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })
@@ -64,6 +69,7 @@ app.listen(PORT, () => {
   console.log(`API server running on port ${PORT}`)
   scheduleStreakResetJob()
   scheduleTrendsRefreshJob()
+  scheduleStreakReminderJob()
 })
 
 export default app

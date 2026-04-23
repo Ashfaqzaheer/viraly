@@ -19,6 +19,8 @@ model Creator {
   followerCountRange String?
   primaryGoal        String?
   onboardingComplete Boolean   @default(false)
+  isPremium          Boolean   @default(false)
+  premiumSince       DateTime?
   encryptedApiKey    String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -32,6 +34,7 @@ model Creator {
   lessonCompletions  LessonCompletion[]
   viralityPredictions ViralityPrediction[]
   dailyMissions      DailyMission[]
+  pushSubscriptions  PushSubscription[]
 }
 
 model DailyMission {
@@ -233,4 +236,17 @@ model LessonCompletion {
   lesson      MonetizationLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([creatorId, lessonId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  creatorId String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
 }
