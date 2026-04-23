@@ -39,6 +39,7 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
       const aiResponse = await fetch(`${AI_SERVICE_URL}/predict-virality`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(15000),
         body: JSON.stringify({ url: submission.url }),
       })
 
@@ -49,7 +50,7 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
 
       const data = await aiResponse.json() as typeof aiResult
       return { ok: true, data }
-    } catch {
+    } catch (err) { console.error("[virality] AI call error:", err)
       return { ok: false, message: 'Could not reach AI service' }
     }
   }

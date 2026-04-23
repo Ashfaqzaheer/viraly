@@ -66,7 +66,7 @@ export async function rateLimiter(req: Request, res: Response, next: NextFunctio
     }
 
     next()
-  } catch {
+  } catch (err) { console.error("[rateLimiter] Redis error:", err)
     // If Redis is unavailable, fail open to avoid blocking all requests
     next()
   }

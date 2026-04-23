@@ -22,7 +22,7 @@ export function isAllowedDomain(rawUrl: string): boolean {
     return ALLOWED_DOMAINS.some(
       (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
     )
-  } catch {
+  } catch (err) { console.error("[reel] domain parse error:", err)
     return false
   }
 }
@@ -82,6 +82,7 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
     const aiResponse = await fetch(`${AI_SERVICE_URL}/analyze-reel`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(15000),
       body: JSON.stringify({ url }),
     })
 

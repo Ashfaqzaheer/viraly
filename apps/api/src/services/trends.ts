@@ -74,7 +74,7 @@ export async function getTrends(niche?: string): Promise<{ trends: Trend[]; isFa
       if (Array.isArray(parsed)) return { trends: parsed, isFallback: false }
       return parsed
     }
-  } catch {
+  } catch (err) { console.error("[trends] Redis error:", err)
     // Redis unavailable — fall through to DB query
   }
 
@@ -107,7 +107,7 @@ export async function getTrends(niche?: string): Promise<{ trends: Trend[]; isFa
   const result = { trends, isFallback }
   try {
     await redis.set(cacheKey, JSON.stringify(result), 'EX', TREND_CACHE_TTL)
-  } catch { /* non-fatal */ }
+  } catch (err) { console.error('[trends] Redis error:', err) }
 
   return result
 }
@@ -121,6 +121,7 @@ export async function refreshTrends(): Promise<void> {
   const aiResponse = await fetch(`${AI_SERVICE_URL}/refresh-trends`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(15000),
   })
 
   if (!aiResponse.ok) {
@@ -166,7 +167,7 @@ export async function refreshTrends(): Promise<void> {
     if (keys.length > 0) {
       await redis.del(...keys)
     }
-  } catch {
+  } catch (err) { console.error("[trends] Redis error:", err)
     // Non-fatal: cache invalidation failure is acceptable
   }
 }

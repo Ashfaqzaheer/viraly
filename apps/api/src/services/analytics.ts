@@ -101,7 +101,7 @@ export async function getDashboard(
     if (cached) {
       return JSON.parse(cached) as DashboardData
     }
-  } catch {
+  } catch (err) { console.error("[analytics] Redis error:", err)
     // Redis unavailable — fall through to DB
   }
 
@@ -157,7 +157,7 @@ export async function getDashboard(
   // Populate cache
   try {
     await redisClient.set(cacheKey, JSON.stringify(data), 'EX', ANALYTICS_CACHE_TTL)
-  } catch {
+  } catch (err) { console.error("[analytics] Redis error:", err)
     // Non-fatal
   }
 

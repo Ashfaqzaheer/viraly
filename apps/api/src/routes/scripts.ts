@@ -1,11 +1,13 @@
 import { Router, Request, Response } from 'express'
 import Redis from 'ioredis'
 import { prisma } from '@viraly/db'
-import { recordDailyAction } from '../services/streak'
+import { recordDailyAction, getStreak } from '../services/streak'
 import { buildTrendContext } from '../services/trendEngine'
 
 const router = Router()
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL ?? 'http://localhost:8000'
+const AI_TIMEOUT_MS = 10_000 // 10 second timeout for AI requests
+const STREAK_UNLOCK_SCRIPTS = 3 // Day 3 streak unlocks script 2
 
 let redisClient: Redis | null = null
 function getRedisClient(): Redis {
@@ -48,6 +50,7 @@ router.post('/initial', async (req: Request, res: Response): Promise<void> => {
   const aiRes = await fetch(`${AI_SERVICE_URL}/scripts/initial`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
     body: JSON.stringify({
       creatorId, niche: creator.primaryNiche, date: todayUTC(), idea,
       trendContext,
@@ -63,7 +66,7 @@ router.post('/initial', async (req: Request, res: Response): Promise<void> => {
   // Tag the script as trend-based
   ;(script as Record<string, unknown>).trendBased = trendContext.topClusters.length > 0
   ;(script as Record<string, unknown>).trendCluster = trendContext.topClusters[0]?.name ?? null
-  await recordDailyAction(creatorId).catch(() => {})
+  await recordDailyAction(creatorId).catch((err) => { console.error('[scripts/initial] streak record failed:', err) })
   res.status(200).json({ script })
 })
 
@@ -81,17 +84,43 @@ router.post('/more', async (req: Request, res: Response): Promise<void> => {
     return
   }
 
+  // Backend streak gate: enforce Day 3 streak requirement for script 2
+  const streak = await getStreak(creatorId)
+  const scriptIndex = typeof req.body.scriptIndex === 'number' ? req.body.scriptIndex : undefined
+
+  // If requesting a specific locked script, enforce gates
+  if (scriptIndex === 2 && streak.current < STREAK_UNLOCK_SCRIPTS) {
+    console.warn(`[scripts/more] Streak gate blocked: creator=${creatorId} streak=${streak.current} required=${STREAK_UNLOCK_SCRIPTS}`)
+    res.status(403).json({ error: 'streak_required', message: `Day ${STREAK_UNLOCK_SCRIPTS} streak required to unlock script 2`, currentStreak: streak.current })
+    return
+  }
+  if (scriptIndex === 3) {
+    // Premium gate — no premium system yet, block script 3
+    console.warn(`[scripts/more] Premium gate blocked: creator=${creatorId}`)
+    res.status(403).json({ error: 'premium_required', message: 'Premium subscription required to access script 3' })
+    return
+  }
+
   const idea = (req.body.idea as string)?.trim()
   if (!idea) { res.status(400).json({ error: 'bad_request', message: 'idea is required' }); return }
 
   // Build trend context — each of the 3 scripts should use a different cluster
   const trendContext = await buildTrendContext(creator.primaryNiche)
 
-  const aiRes = await fetch(`${AI_SERVICE_URL}/scripts/more`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ niche: creator.primaryNiche, idea, trendContext }),
-  })
+  let aiRes: globalThis.Response
+  try {
+    aiRes = await fetch(`${AI_SERVICE_URL}/scripts/more`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(AI_TIMEOUT_MS),
+      body: JSON.stringify({ niche: creator.primaryNiche, idea, trendContext }),
+    })
+  } catch (err) {
+    console.error('[scripts/more] AI request failed:', err)
+    res.status(502).json({ error: 'ai_service_unavailable', message: 'AI service timeout or failure' })
+    return
+  }
+
   if (!aiRes.ok) {
     const body = await aiRes.json().catch(() => ({})) as { message?: string }
     res.status(502).json({ error: 'ai_service_unavailable', message: body.message ?? 'Generation failed' })
@@ -105,7 +134,7 @@ router.post('/more', async (req: Request, res: Response): Promise<void> => {
     s.trendBased = true
     s.trendCluster = clusterNames[i] ?? clusterNames[0] ?? null
   })
-  res.status(200).json({ scripts })
+  res.status(200).json({ scripts, streakCurrent: streak.current })
 })
 
 // ── Step 3: Full execution guide ─────────────────────────────────────────────
@@ -131,6 +160,7 @@ router.post('/guide', async (req: Request, res: Response): Promise<void> => {
   const aiRes = await fetch(`${AI_SERVICE_URL}/scripts/guide`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
     body: JSON.stringify({ niche: creator.primaryNiche, idea: idea.trim(), hook: hook.trim(), concept: concept.trim() }),
   })
   if (!aiRes.ok) {
@@ -146,7 +176,7 @@ router.post('/guide', async (req: Request, res: Response): Promise<void> => {
   const cacheKey = `scripts:${creatorId}:${date}`
   const redis = getRedisClient()
   await persistAndCache({ creatorId, date, scripts: [guide], cacheKey, redis })
-  await recordDailyAction(creatorId).catch(() => {})
+  await recordDailyAction(creatorId).catch((err) => { console.error('[scripts/guide] streak record failed:', err) })
 
   res.status(200).json({ guide })
 })
@@ -196,16 +226,17 @@ router.get('/daily', async (req: Request, res: Response): Promise<void> => {
     try {
       const cached = await redis.get(cacheKey)
       if (cached) {
-        await recordDailyAction(creatorId).catch(() => {})
+        await recordDailyAction(creatorId).catch((err) => { console.error('[scripts/daily] streak record failed:', err) })
         res.status(200).json({ date, scripts: JSON.parse(cached), cached: true })
         return
       }
-    } catch { /* fall through */ }
+    } catch (err) { console.error('[scripts/daily] Redis cache read failed:', err) }
   }
 
   const aiResponse = await fetch(`${AI_SERVICE_URL}/generate-scripts`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
     body: JSON.stringify({ creatorId, niche: creator.primaryNiche, date, ...(idea && { idea }) }),
   })
   if (!aiResponse.ok) {
@@ -216,7 +247,7 @@ router.get('/daily', async (req: Request, res: Response): Promise<void> => {
 
   const { scripts } = await aiResponse.json() as { scripts: unknown[] }
   await persistAndCache({ creatorId, date, scripts, cacheKey, redis })
-  await recordDailyAction(creatorId).catch(() => {})
+  await recordDailyAction(creatorId).catch((err) => { console.error('[scripts/daily] streak record failed:', err) })
   res.status(200).json({ date, scripts, cached: false })
 })
 
@@ -231,7 +262,7 @@ export async function persistAndCache(params: {
     create: { creatorId, date, scripts: scriptsJson },
     update: { scripts: scriptsJson },
   })
-  try { await redis.set(cacheKey, JSON.stringify(scripts), 'EX', secondsUntilMidnightUTC()) } catch { /* non-fatal */ }
+  try { await redis.set(cacheKey, JSON.stringify(scripts), 'EX', secondsUntilMidnightUTC()) } catch (err) { console.error('[persistAndCache] Redis write failed:', err) }
 }
 
 export default router
