@@ -2,8 +2,8 @@
  * Analytics Dashboard service — getDashboard, exportCSV.
  * Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6
  */
-import Redis from 'ioredis'
 import { prisma } from '@viraly/db'
+import redis from '../lib/redis'
 import { StreakState } from './streak'
 
 const ANALYTICS_CACHE_TTL = 300 // 5 minutes
@@ -90,20 +90,16 @@ function parseFeedback(raw: unknown): FeedbackScoresSummary | null {
  * Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6
  */
 export async function getDashboard(
-  creatorId: string,
-  redisClient: Redis
+  creatorId: string
 ): Promise<DashboardData> {
   const cacheKey = `analytics:${creatorId}`
 
-  // Check cache first
   try {
-    const cached = await redisClient.get(cacheKey)
+    const cached = await redis.get(cacheKey)
     if (cached) {
       return JSON.parse(cached) as DashboardData
     }
-  } catch (err) { console.error("[analytics] Redis error:", err)
-    // Redis unavailable — fall through to DB
-  }
+  } catch (err) { console.error("[analytics] Redis read error:", err) }
 
   // Fetch latest analytics snapshot
   const snapshot = await prisma.analyticsSnapshot.findFirst({
@@ -156,10 +152,8 @@ export async function getDashboard(
 
   // Populate cache
   try {
-    await redisClient.set(cacheKey, JSON.stringify(data), 'EX', ANALYTICS_CACHE_TTL)
-  } catch (err) { console.error("[analytics] Redis error:", err)
-    // Non-fatal
-  }
+    await redis.set(cacheKey, JSON.stringify(data), 'EX', ANALYTICS_CACHE_TTL)
+  } catch (err) { console.error("[analytics] Redis write error:", err) }
 
   return data
 }

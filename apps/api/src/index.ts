@@ -1,6 +1,5 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
-import redis from './lib/redis'
 import { httpsEnforcement } from './middleware/https'
 import { createCorsMiddleware } from './middleware/cors'
 import { jwtVerification } from './middleware/jwt'
@@ -14,7 +13,7 @@ import reelRouter from './routes/reel'
 import viralityRouter from './routes/virality'
 import trendsRouter from './routes/trends'
 import hooksRouter from './routes/hooks'
-import createAnalyticsRouter from './routes/analytics'
+import analyticsRouter from './routes/analytics'
 import monetizationRouter from './routes/monetization'
 import missionRouter from './routes/mission'
 import paymentRouter from './routes/payment'
@@ -55,7 +54,7 @@ app.use('/reel', reelRouter)
 app.use('/virality', viralityRouter)
 app.use('/trends', trendsRouter)
 app.use('/hooks', hooksRouter)
-app.use('/analytics', createAnalyticsRouter(redis))
+app.use('/analytics', analyticsRouter)
 app.use('/monetization', monetizationRouter)
 app.use('/mission', missionRouter)
 app.use('/payment', paymentRouter)
