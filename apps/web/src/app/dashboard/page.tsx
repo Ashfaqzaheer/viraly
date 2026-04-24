@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/auth"
 import { apiFetch } from "@/lib/api"
 import GlassCard3D from "../components/GlassCard3D"
+import DashboardSkeleton from "../components/DashboardSkeleton"
 
 interface Mission { id: string; date: string; hook: string; concept: string; completed: boolean }
 interface StreakData { current: number; highest: number; lastActionDate: string }
@@ -55,30 +56,7 @@ export default function DashboardPage() {
     setCompleting(false)
   }
 
-  if (isLoading) return (
-    <div className="relative min-h-screen overflow-hidden">
-      <main className="relative z-10 mx-auto max-w-6xl px-6 py-10 animate-fade-in">
-        <div className="mb-10">
-          <div className="h-8 w-64 rounded-lg bg-white/[0.06] animate-pulse" />
-          <div className="h-4 w-48 rounded-lg bg-white/[0.04] animate-pulse mt-3" />
-        </div>
-        <div className="glass-strong rounded-2xl p-6 mb-6 animate-pulse">
-          <div className="h-5 w-32 rounded bg-white/[0.06] mb-3" />
-          <div className="h-6 w-full rounded bg-white/[0.04] mb-2" />
-          <div className="h-4 w-3/4 rounded bg-white/[0.03]" />
-        </div>
-        <nav className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="glass rounded-2xl p-5 h-32 animate-pulse">
-              <div className="h-10 w-10 rounded-xl bg-white/[0.04] mb-3" />
-              <div className="h-4 w-20 rounded bg-white/[0.06] mb-1" />
-              <div className="h-3 w-32 rounded bg-white/[0.03]" />
-            </div>
-          ))}
-        </nav>
-      </main>
-    </div>
-  )
+  if (isLoading) return <DashboardSkeleton />
 
   if (!accessToken) return null
 
