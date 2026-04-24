@@ -29,7 +29,7 @@ export default function AnalyticsPage() {
     setExporting(true)
     try {
       const token = await getToken(); if (!token) return
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
       const res = await fetch(`${API_BASE}/analytics/export-csv`, { headers: { Authorization: `Bearer ${token}` } })
       if (!res.ok) return
       const blob = await res.blob(); const url = URL.createObjectURL(blob)

@@ -4,7 +4,7 @@ import { useState, useEffect, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 type FollowerRange = 'under_1k' | '1k_10k' | '10k_100k' | 'over_100k'
 interface OnboardingFormData { displayName: string; primaryNiche: string; secondaryNiche: string; instagramHandle: string; followerCountRange: FollowerRange | ''; primaryGoal: string }
 

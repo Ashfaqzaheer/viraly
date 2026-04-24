@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
 const ERROR_MESSAGES: Record<string, string> = {
   email_taken: 'An account with this email already exists.',
