@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, FormEvent } from "react"
+import { useState, useEffect, useRef, FormEvent, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth"
@@ -79,6 +79,14 @@ function getDifficulty(script: DeepScript): string {
 type Step = "idle" | "initial" | "more" | "guide"
 
 export default function ScriptsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin" /></div>}>
+      <ScriptsPageInner />
+    </Suspense>
+  )
+}
+
+function ScriptsPageInner() {
   const { getToken } = useAuth()
   const searchParams = useSearchParams()
   const autoTriggered = useRef(false)
