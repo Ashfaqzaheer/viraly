@@ -189,3 +189,62 @@ Notes:
 - Without `RAZORPAY_KEY_ID`, payment routes return "not configured" gracefully
 - Without `VAPID_*` keys, push notifications are disabled (no crash)
 
+
+## Production Deployment (Nginx + SSL)
+
+For production on a VPS with a domain:
+
+### 1. Update Nginx config
+
+Edit `nginx/conf.d/default.conf`:
+- Replace `yourdomain.com` with your actual domain
+- Uncomment the HTTPS server block
+- Comment out the HTTP proxy_pass and uncomment the redirect
+
+### 2. Set environment
+
+```bash
+cp .env.example .env
+# Edit .env with production values:
+# NEXT_PUBLIC_API_URL=https://yourdomain.com/api
+# JWT_SECRET=<strong-random-string>
+# FRONTEND_URL=https://yourdomain.com
+```
+
+### 3. Start services (HTTP first for cert generation)
+
+```bash
+docker-compose up -d
+```
+
+### 4. Generate SSL certificate
+
+```bash
+docker-compose run --rm certbot certonly \
+  --webroot --webroot-path=/var/www/certbot \
+  -d yourdomain.com -d www.yourdomain.com \
+  --email your@email.com --agree-tos --no-eff-email
+```
+
+### 5. Enable HTTPS in Nginx config and restart
+
+```bash
+docker-compose restart nginx
+```
+
+### 6. Auto-renew SSL (add to crontab)
+
+```bash
+0 3 * * * cd /path/to/viraly && docker-compose run --rm certbot renew && docker-compose restart nginx
+```
+
+### Architecture
+
+```
+User → Nginx (80/443) → Frontend (3000)
+                       → API (3001) → AI (8000)
+                                    → PostgreSQL (5432)
+                                    → Redis (6379)
+```
+
+Internal ports (3000, 3001, 8000) are not exposed publicly — only Nginx ports 80/443 face the internet.
