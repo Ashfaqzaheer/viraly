@@ -29,6 +29,6 @@ ENV NODE_ENV=production
 
 # Use $PORT in healthcheck so it works on Railway (dynamic port) and locally
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-3001}/health || exit 1
+  CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
 
 CMD sh -c "npx prisma migrate deploy --schema=prisma/schema.prisma 2>/dev/null; node -r tsconfig-paths/register dist/index.js 2>/dev/null || npx ts-node -r tsconfig-paths/register src/index.ts"
