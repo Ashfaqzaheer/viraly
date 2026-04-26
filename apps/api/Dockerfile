@@ -3,15 +3,14 @@ WORKDIR /app
 
 RUN apk add --no-cache python3 make g++ curl
 
-# Copy package.json and remove workspace dependency before install
+# Copy package.json (no @viraly/db dependency)
 COPY package.json ./
-RUN node -e "const p=require('./package.json'); delete p.dependencies['@viraly/db']; delete p.workspaces; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2))"
 
 # Copy Prisma schema
 COPY prisma/ ./prisma/
 
-# Install all dependencies
-RUN npm install
+# Install dependencies
+RUN npm install --production=false
 
 # Generate Prisma client
 RUN npx prisma generate --schema=prisma/schema.prisma
