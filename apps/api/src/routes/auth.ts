@@ -10,10 +10,11 @@ const REFRESH_COOKIE_NAME = 'refresh_token'
 const REFRESH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 function setRefreshCookie(res: Response, refreshToken: string) {
+  const isProduction = process.env.NODE_ENV === 'production'
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/auth',
     maxAge: REFRESH_COOKIE_MAX_AGE,
   })
@@ -179,51 +180,14 @@ router.post('/logout', async (req: Request, res: Response): Promise<void> => {
 // ---------------------------------------------------------------------------
 // GET /auth/google
 // Initiates Google OAuth flow — redirects user to Google consent screen
-// In dev mode (no GOOGLE_CLIENT_ID), shows a mock OAuth page
 // Requirements: 1.2
 // ---------------------------------------------------------------------------
 router.get('/google', (_req: Request, res: Response): void => {
   const clientId = process.env.GOOGLE_CLIENT_ID
   const redirectUri = process.env.GOOGLE_REDIRECT_URI
 
-  // Dev mode: show mock OAuth page when Google credentials aren't configured
   if (!clientId || !redirectUri) {
-    if (process.env.NODE_ENV === 'production') {
-      res.status(500).json({ error: 'server_error', message: 'Google OAuth not configured' })
-      return
-    }
-
-    // Serve a simple dev mock OAuth page
-    res.setHeader('Content-Type', 'text/html')
-    res.send(`<!DOCTYPE html>
-<html><head><title>Dev OAuth - Viraly</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #fff; }
-  .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 40px; width: 400px; backdrop-filter: blur(20px); }
-  .badge { display: inline-block; background: rgba(139,92,246,0.2); color: #a78bfa; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
-  h1 { font-size: 22px; margin-bottom: 6px; }
-  p { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 24px; }
-  label { display: block; font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-  input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-size: 14px; outline: none; transition: border-color 0.2s; }
-  input:focus { border-color: rgba(139,92,246,0.5); }
-  button { width: 100%; margin-top: 20px; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-  button:hover { opacity: 0.9; }
-  .hint { margin-top: 16px; text-align: center; font-size: 12px; color: rgba(255,255,255,0.25); }
-</style></head>
-<body>
-  <div class="card">
-    <span class="badge">DEV MODE</span>
-    <h1>Mock Google Sign-In</h1>
-    <p>Google OAuth credentials not configured. Enter any email to simulate Google login.</p>
-    <form action="/auth/google/callback/dev" method="GET">
-      <label>Email Address</label>
-      <input name="email" type="email" placeholder="dev@example.com" value="dev@viraly.test" required />
-      <button type="submit">Sign in as this user</button>
-    </form>
-    <div class="hint">This page only appears in development mode</div>
-  </div>
-</body></html>`)
+    res.status(500).json({ error: 'oauth_not_configured', message: 'Google OAuth credentials are not set. Add GOOGLE_CLIENT_ID and GOOGLE_REDIRECT_URI.' })
     return
   }
 
@@ -237,40 +201,6 @@ router.get('/google', (_req: Request, res: Response): void => {
   })
 
   res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`)
-})
-
-// ---------------------------------------------------------------------------
-// GET /auth/google/callback/dev
-// Dev-only mock OAuth callback — creates/finds user by email without Google
-// ---------------------------------------------------------------------------
-router.get('/google/callback/dev', async (req: Request, res: Response): Promise<void> => {
-  if (process.env.NODE_ENV === 'production') {
-    res.status(404).json({ error: 'not_found' })
-    return
-  }
-
-  const { email } = req.query as { email?: string }
-
-  if (!email) {
-    res.status(400).json({ error: 'missing_email', message: 'Email is required for dev OAuth' })
-    return
-  }
-
-  // Find or create the creator
-  let creator = await prisma.creator.findUnique({ where: { email } })
-
-  if (!creator) {
-    creator = await prisma.creator.create({
-      data: { email, googleId: `dev-${email}` },
-    })
-  }
-
-  const { accessToken, refreshToken } = await issueTokens(creator.id, creator.email)
-
-  setRefreshCookie(res, refreshToken)
-
-  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000'
-  res.redirect(`${frontendUrl}/auth/callback`)
 })
 
 // ---------------------------------------------------------------------------
