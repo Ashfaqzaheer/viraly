@@ -1,7 +1,7 @@
 FROM node:18-alpine
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++ curl
+RUN apk add --no-cache python3 make g++ curl openssl openssl-dev
 
 # Copy package.json (no @viraly/db dependency)
 COPY package.json ./
