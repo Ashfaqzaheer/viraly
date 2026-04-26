@@ -1,31 +1,32 @@
 FROM node:18-alpine
 WORKDIR /app
 
-# Install build tools + OpenSSL 3.x runtime libs (required for Prisma on Alpine)
+# Build tools + OpenSSL 3.x (required for Prisma on Alpine)
 RUN apk add --no-cache python3 make g++ curl openssl openssl-dev libc6-compat
 
-# Copy API package.json (standalone install, no workspace refs)
+# Package + Prisma schema first (layer caching)
 COPY apps/api/package.json ./
-
-# Copy Prisma schema before install so generate picks up binaryTargets
 COPY apps/api/prisma/ ./prisma/
 
-# Install all deps (need devDeps for prisma CLI + TypeScript build)
+# Install deps + tsc-alias for path resolution in compiled output
 RUN npm install --production=false
+RUN npm install -D tsc-alias
 
-# Generate Prisma client with correct Alpine/musl engine
+# Generate Prisma client
 ENV PRISMA_CLI_QUERY_ENGINE_TYPE=library
 RUN npx prisma generate --schema=prisma/schema.prisma
 
-# Copy source and config
+# Copy source + tsconfig
 COPY apps/api/tsconfig.json ./
 COPY apps/api/src/ ./src/
 
-# Build TypeScript (allow errors — fallback to ts-node at runtime)
-RUN npx tsc --outDir dist 2>&1 || true
+# Remove test files before build (they have TS errors irrelevant to production)
+RUN rm -rf src/tests
+
+# Compile TypeScript and resolve @viraly/db path alias in dist
+RUN npx tsc --outDir dist && npx tsc-alias -p tsconfig.json
 
 ENV NODE_ENV=production
 
-# No HEALTHCHECK — Railway manages health checks via its own system
-# Using ts-node directly since tsc may have path alias issues in dist
-CMD sh -c "npx prisma migrate deploy --schema=prisma/schema.prisma 2>/dev/null; npx ts-node -r tsconfig-paths/register src/index.ts"
+# Production: compiled JS, no ts-node overhead
+CMD sh -c "npx prisma migrate deploy --schema=prisma/schema.prisma 2>/dev/null; node -r tsconfig-paths/register dist/index.js"
