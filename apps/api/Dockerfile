@@ -3,24 +3,25 @@ WORKDIR /app
 
 RUN apk add --no-cache python3 make g++ curl
 
-# Copy package files
+# Copy package.json and remove workspace dependency before install
 COPY package.json ./
+RUN node -e "const p=require('./package.json'); delete p.dependencies['@viraly/db']; delete p.workspaces; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2))"
+
+# Copy Prisma schema
 COPY prisma/ ./prisma/
 
-# Install dependencies (standalone, not workspace mode)
-RUN npm init -y 2>/dev/null; \
-    npm install express cors helmet cookie-parser bcrypt jsonwebtoken ioredis node-cron web-push @prisma/client && \
-    npm install -D typescript @types/express @types/cors @types/cookie-parser @types/bcrypt @types/jsonwebtoken @types/node ts-node tsconfig-paths prisma
+# Install all dependencies
+RUN npm install
 
-# Generate Prisma client from local schema
+# Generate Prisma client
 RUN npx prisma generate --schema=prisma/schema.prisma
 
-# Copy source code
-COPY src/ ./src/
+# Copy source and config
 COPY tsconfig.json ./
+COPY src/ ./src/
 
 # Build TypeScript
-RUN npx tsc --outDir dist || true
+RUN npx tsc --outDir dist 2>&1 || true
 
 EXPOSE 3001
 ENV NODE_ENV=production
