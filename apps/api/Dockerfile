@@ -24,11 +24,11 @@ COPY apps/api/src/ ./src/
 # Build TypeScript (allow errors — fallback to ts-node at runtime)
 RUN npx tsc --outDir dist 2>&1 || true
 
-EXPOSE 3001
+# Railway sets PORT dynamically — don't hardcode it
 ENV NODE_ENV=production
-ENV PORT=3001
 
+# Use $PORT in healthcheck so it works on Railway (dynamic port) and locally
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:3001/health || exit 1
+  CMD curl -f http://localhost:${PORT:-3001}/health || exit 1
 
 CMD sh -c "npx prisma migrate deploy --schema=prisma/schema.prisma 2>/dev/null; node -r tsconfig-paths/register dist/index.js 2>/dev/null || npx ts-node -r tsconfig-paths/register src/index.ts"
