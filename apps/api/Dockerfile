@@ -34,4 +34,4 @@ RUN npx tsc --outDir dist && npx tsc-alias -p tsconfig.json
 
 ENV NODE_ENV=production
 
-CMD sh -c "npx prisma migrate deploy --schema=prisma/schema.prisma && node -r tsconfig-paths/register dist/index.js"
+CMD sh -c "npx prisma migrate deploy --schema=prisma/schema.prisma || npx prisma db push --schema=prisma/schema.prisma --accept-data-loss; node -r tsconfig-paths/register dist/index.js"
