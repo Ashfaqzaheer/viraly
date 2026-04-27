@@ -5,8 +5,8 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++ curl openssl openssl-dev libc6-compat
 
 # Package + Prisma schema first (layer caching)
-COPY apps/api/package.json ./
-COPY apps/api/prisma/ ./prisma/
+COPY package.json ./
+COPY prisma/ ./prisma/
 
 # Install deps + tsc-alias for path resolution in compiled output
 RUN npm install --production=false
@@ -17,8 +17,8 @@ ENV PRISMA_CLI_QUERY_ENGINE_TYPE=library
 RUN npx prisma generate --schema=prisma/schema.prisma
 
 # Copy source + tsconfig
-COPY apps/api/tsconfig.json ./
-COPY apps/api/src/ ./src/
+COPY tsconfig.json ./
+COPY src/ ./src/
 
 # Remove test files before build (they have TS errors irrelevant to production)
 RUN rm -rf src/tests
