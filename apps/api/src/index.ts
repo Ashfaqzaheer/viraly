@@ -1,7 +1,6 @@
 import express from 'express'
+import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import { httpsEnforcement } from './middleware/https'
-import { createCorsMiddleware } from './middleware/cors'
 import { jwtVerification } from './middleware/jwt'
 import { rateLimiter } from './middleware/rateLimiter'
 import { inputValidator } from './middleware/inputValidator'
@@ -25,30 +24,46 @@ import { scheduleStreakReminderJob } from './jobs/streakReminder'
 const app = express()
 const PORT = process.env.PORT ?? 3001
 
-// Parse JSON bodies before middleware runs
+// ── CORS — MUST be first, before everything ──────────────────────────────
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://viraly-production.up.railway.app',
+  'http://localhost:3000',
+].filter(Boolean) as string[]
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, mobile, server-to-server)
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    console.warn(`[CORS] Blocked origin: ${origin}`)
+    return callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}
+
+// Handle preflight OPTIONS for ALL routes
+app.options('*', cors(corsOptions))
+
+// Apply CORS to all requests
+app.use(cors(corsOptions))
+
+// ── Body parsing + cookies ───────────────────────────────────────────────
 app.use(express.json())
 app.use(cookieParser())
 
-// Middleware stack (in order):
-// 1. HTTPS enforcement
-app.use(httpsEnforcement)
-
-// 2. CORS — restricted to configured frontend domain
-app.use(createCorsMiddleware())
-
-// Explicit preflight handler for all routes
-app.options('*', createCorsMiddleware())
-
-// 3. JWT verification — skips public endpoints
+// ── Middleware (after CORS, after body parsing) ──────────────────────────
 app.use(jwtVerification)
-
-// 4. Rate limiter — Redis sliding window, 100 req/min per creator
 app.use(rateLimiter)
-
-// 5. Input validator — SQL and script injection detection
 app.use(inputValidator)
 
-// Route handlers — all under /api prefix
+// ── Health check ─────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => res.json({ status: 'ok' }))
+app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
+
+// ── Routes under /api prefix (production) ────────────────────────────────
 const apiRouter = express.Router()
 apiRouter.use('/auth', authRouter)
 apiRouter.use('/onboarding', onboardingRouter)
@@ -63,10 +78,9 @@ apiRouter.use('/monetization', monetizationRouter)
 apiRouter.use('/mission', missionRouter)
 apiRouter.use('/payment', paymentRouter)
 apiRouter.use('/push', pushRouter)
-
 app.use('/api', apiRouter)
 
-// Also mount without prefix for backward compatibility (local dev, docker-compose)
+// ── Same routes without prefix (local dev backward compat) ───────────────
 app.use('/auth', authRouter)
 app.use('/onboarding', onboardingRouter)
 app.use('/scripts', scriptsRouter)
@@ -81,16 +95,13 @@ app.use('/mission', missionRouter)
 app.use('/payment', paymentRouter)
 app.use('/push', pushRouter)
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' })
-})
-
+// ── Start server ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`API server running on port ${PORT}`)
+  console.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`)
   scheduleStreakResetJob()
   scheduleTrendsRefreshJob()
   scheduleStreakReminderJob()
 })
 
 export default app
-
