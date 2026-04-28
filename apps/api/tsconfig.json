@@ -13,7 +13,11 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@viraly/db": ["./src/db"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/tests/**/*", "src/**/*.test.ts", "src/**/*.spec.ts"]
