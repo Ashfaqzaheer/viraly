@@ -10,6 +10,7 @@ RUN npm ci --workspace=@viraly/api --workspace=@viraly/db --include-workspace-ro
 COPY apps/api/ ./apps/api/
 COPY packages/db/ ./packages/db/
 RUN npx prisma generate --schema=packages/db/prisma/schema.prisma
+RUN npm run build --workspace=@viraly/db
 RUN npm run build --workspace=@viraly/api
 EXPOSE 8080
 ENV NODE_ENV=production
