@@ -30,6 +30,15 @@ const PUBLIC_PATHS = [
   '/auth/google/callback',
   '/auth/google/callback/dev',
   '/health',
+  // /api prefixed versions (Railway production)
+  '/api/auth/register',
+  '/api/auth/login',
+  '/api/auth/refresh',
+  '/api/auth/logout',
+  '/api/auth/google',
+  '/api/auth/google/callback',
+  '/api/auth/google/callback/dev',
+  '/api/health',
 ]
 
 /**
@@ -38,7 +47,10 @@ const PUBLIC_PATHS = [
  * Requirement 11.5
  */
 export function jwtVerification(req: Request, res: Response, next: NextFunction): void {
-  if (PUBLIC_PATHS.includes(req.path)) {
+  // Strip /api prefix for path matching (handles both /auth/login and /api/auth/login)
+  const normalizedPath = req.path.replace(/^\/api/, '')
+
+  if (PUBLIC_PATHS.includes(req.path) || PUBLIC_PATHS.includes(normalizedPath)) {
     return next()
   }
 
