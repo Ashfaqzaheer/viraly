@@ -67,7 +67,7 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
   if (!result.ok) {
     res.status(502).json({
       error: 'ai_service_unavailable',
-      message: result?.message as string,
+      message: (result as any).message,
     })
     return
   }
