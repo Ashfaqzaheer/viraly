@@ -1,14 +1,14 @@
 FROM node:18-alpine
 WORKDIR /app
 RUN apk add --no-cache python3 make g++ curl openssl openssl-dev libc6-compat
+ENV PRISMA_CLI_QUERY_ENGINE_TYPE=library
+ENV PRISMA_CLIENT_ENGINE_TYPE=library
 COPY package.json package-lock.json ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/db/package.json ./packages/db/
 RUN npm ci --workspace=@viraly/api --workspace=@viraly/db --include-workspace-root
 COPY apps/api/ ./apps/api/
 COPY packages/db/ ./packages/db/
-ENV PRISMA_CLI_QUERY_ENGINE_TYPE=library
-ENV PRISMA_CLIENT_ENGINE_TYPE=library
 RUN npx prisma generate --schema=packages/db/prisma/schema.prisma
 RUN npm run build --workspace=@viraly/api
 EXPOSE 8080
