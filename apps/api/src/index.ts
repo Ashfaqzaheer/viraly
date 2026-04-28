@@ -36,6 +36,9 @@ app.use(httpsEnforcement)
 // 2. CORS — restricted to configured frontend domain
 app.use(createCorsMiddleware())
 
+// Explicit preflight handler for all routes
+app.options('*', createCorsMiddleware())
+
 // 3. JWT verification — skips public endpoints
 app.use(jwtVerification)
 
