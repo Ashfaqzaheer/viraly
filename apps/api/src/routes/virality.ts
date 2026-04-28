@@ -45,7 +45,7 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
 
       if (!aiResponse.ok) {
         const body = await aiResponse.json().catch(() => ({})) as { message?: string }
-        return { ok: false, message: body.message ?? 'Virality prediction failed' }
+        return { ok: false, message: body.message as string ?? 'Virality prediction failed' }
       }
 
       const data = await aiResponse.json() as typeof aiResult
@@ -67,7 +67,7 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
   if (!result.ok) {
     res.status(502).json({
       error: 'ai_service_unavailable',
-      message: result.message,
+      message: result.message as string,
     })
     return
   }
