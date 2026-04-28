@@ -48,7 +48,25 @@ app.use(rateLimiter)
 // 5. Input validator — SQL and script injection detection
 app.use(inputValidator)
 
-// Route handlers
+// Route handlers — all under /api prefix
+const apiRouter = express.Router()
+apiRouter.use('/auth', authRouter)
+apiRouter.use('/onboarding', onboardingRouter)
+apiRouter.use('/scripts', scriptsRouter)
+apiRouter.use('/streak', streakRouter)
+apiRouter.use('/reel', reelRouter)
+apiRouter.use('/virality', viralityRouter)
+apiRouter.use('/trends', trendsRouter)
+apiRouter.use('/hooks', hooksRouter)
+apiRouter.use('/analytics', analyticsRouter)
+apiRouter.use('/monetization', monetizationRouter)
+apiRouter.use('/mission', missionRouter)
+apiRouter.use('/payment', paymentRouter)
+apiRouter.use('/push', pushRouter)
+
+app.use('/api', apiRouter)
+
+// Also mount without prefix for backward compatibility (local dev, docker-compose)
 app.use('/auth', authRouter)
 app.use('/onboarding', onboardingRouter)
 app.use('/scripts', scriptsRouter)

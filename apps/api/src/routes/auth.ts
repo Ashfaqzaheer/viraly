@@ -15,13 +15,13 @@ function setRefreshCookie(res: Response, refreshToken: string) {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
-    path: '/auth',
+    path: '/',
     maxAge: REFRESH_COOKIE_MAX_AGE,
   })
 }
 
 function clearRefreshCookie(res: Response) {
-  res.clearCookie(REFRESH_COOKIE_NAME, { path: '/auth' })
+  res.clearCookie(REFRESH_COOKIE_NAME, { path: '/' })
 }
 
 // ---------------------------------------------------------------------------
