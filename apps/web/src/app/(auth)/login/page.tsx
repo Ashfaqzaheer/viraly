@@ -46,7 +46,7 @@ export default function LoginPage() {
   }, [creator, router])
 
   function handleGoogleLogin() {
-    window.location.href = `${API_BASE}/auth/google`
+    window.location.href = `${API_BASE}/api/auth/google`
   }
 
   return (
