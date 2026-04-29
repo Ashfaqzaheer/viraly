@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Refresh token invalid/expired — clear auth state
         tokenRef.current = null
         setState({ accessToken: null, creator: null, isLoading: false })
-    window.location.href = '/login'
+    window.location.replace('/login')
         return null
       }
 
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       tokenRef.current = null
       setState({ accessToken: null, creator: null, isLoading: false })
-    window.location.href = '/login'
+    window.location.replace('/login')
       return null
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -225,7 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     tokenRef.current = null
     setState({ accessToken: null, creator: null, isLoading: false })
-    window.location.href = '/login'
+    window.location.replace('/login')
   }, [])
 
   return (
