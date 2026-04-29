@@ -3,10 +3,9 @@ import { prisma } from '@viraly/db'
 import redis from '../lib/redis'
 import { recordDailyAction, getStreak } from '../services/streak'
 import { buildTrendContext } from '../services/trendEngine'
+import { generateInitialScript, generateMoreScripts, generateFullGuide } from '../lib/groq'
 
 const router = Router()
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL ?? 'http://localhost:8000'
-const AI_TIMEOUT_MS = 10_000
 const STREAK_UNLOCK_SCRIPTS = 3
 
 function todayUTC(): string {
@@ -39,25 +38,18 @@ router.post('/initial', async (req: Request, res: Response): Promise<void> => {
   // Build trend context for AI prompt injection
   const trendContext = await buildTrendContext(creator.primaryNiche)
 
-  const aiRes = await fetch(`${AI_SERVICE_URL}/scripts/initial`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
-    body: JSON.stringify({
-      creatorId, niche: creator.primaryNiche, date: todayUTC(), idea,
-      trendContext,
-    }),
-  })
-  if (!aiRes.ok) {
-    const body = await aiRes.json().catch(() => ({})) as { message?: string }
-    res.status(502).json({ error: 'ai_service_unavailable', message: body.message ?? 'Script generation failed' })
+  let script: Record<string, unknown>
+  try {
+    script = await generateInitialScript({ niche: creator.primaryNiche, idea, trendContext })
+  } catch (err) {
+    console.error('[scripts/initial] AI error:', err)
+    res.status(502).json({ error: 'ai_service_unavailable', message: 'Script generation failed' })
     return
   }
 
-  const { script } = await aiRes.json() as { script: Record<string, unknown> }
   // Tag the script as trend-based
-  ;(script as Record<string, unknown>).trendBased = trendContext.topClusters.length > 0
-  ;(script as Record<string, unknown>).trendCluster = trendContext.topClusters[0]?.name ?? null
+  script.trendBased = trendContext.topClusters.length > 0
+  script.trendCluster = trendContext.topClusters[0]?.name ?? null
   await recordDailyAction(creatorId).catch((err) => { console.error('[scripts/initial] streak record failed:', err) })
   res.status(200).json({ script })
 })
@@ -99,27 +91,15 @@ router.post('/more', async (req: Request, res: Response): Promise<void> => {
   // Build trend context — each of the 3 scripts should use a different cluster
   const trendContext = await buildTrendContext(creator.primaryNiche)
 
-  let aiRes: globalThis.Response
+  let scripts: Array<Record<string, unknown>>
   try {
-    aiRes = await fetch(`${AI_SERVICE_URL}/scripts/more`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(AI_TIMEOUT_MS),
-      body: JSON.stringify({ niche: creator.primaryNiche, idea, trendContext }),
-    })
+    scripts = await generateMoreScripts({ niche: creator.primaryNiche, idea, trendContext })
   } catch (err) {
-    console.error('[scripts/more] AI request failed:', err)
+    console.error('[scripts/more] AI error:', err)
     res.status(502).json({ error: 'ai_service_unavailable', message: 'AI service timeout or failure' })
     return
   }
 
-  if (!aiRes.ok) {
-    const body = await aiRes.json().catch(() => ({})) as { message?: string }
-    res.status(502).json({ error: 'ai_service_unavailable', message: body.message ?? 'Generation failed' })
-    return
-  }
-
-  const { scripts } = await aiRes.json() as { scripts: Array<Record<string, unknown>> }
   // Tag each script with its trend cluster
   const clusterNames = trendContext.topClusters.map(c => c.name)
   scripts.forEach((s, i) => {
@@ -149,19 +129,14 @@ router.post('/guide', async (req: Request, res: Response): Promise<void> => {
     return
   }
 
-  const aiRes = await fetch(`${AI_SERVICE_URL}/scripts/guide`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
-    body: JSON.stringify({ niche: creator.primaryNiche, idea: idea.trim(), hook: hook.trim(), concept: concept.trim() }),
-  })
-  if (!aiRes.ok) {
-    const body = await aiRes.json().catch(() => ({})) as { message?: string }
-    res.status(502).json({ error: 'ai_service_unavailable', message: body.message ?? 'Guide generation failed' })
+  let guide: unknown
+  try {
+    guide = await generateFullGuide({ niche: creator.primaryNiche, idea: idea.trim(), hook: hook.trim(), concept: concept.trim() })
+  } catch (err) {
+    console.error('[scripts/guide] AI error:', err)
+    res.status(502).json({ error: 'ai_service_unavailable', message: 'Guide generation failed' })
     return
   }
-
-  const { guide } = await aiRes.json() as { guide: unknown }
 
   // Persist the guide
   const date = todayUTC()
@@ -225,19 +200,15 @@ router.get('/daily', async (req: Request, res: Response): Promise<void> => {
     } catch (err) { console.error('[scripts/daily] Redis cache read failed:', err) }
   }
 
-  const aiResponse = await fetch(`${AI_SERVICE_URL}/generate-scripts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
-    body: JSON.stringify({ creatorId, niche: creator.primaryNiche, date, ...(idea && { idea }) }),
-  })
-  if (!aiResponse.ok) {
-    const body = await aiResponse.json().catch(() => ({})) as { message?: string }
-    res.status(502).json({ error: 'ai_service_unavailable', message: body.message ?? 'Script generation failed' })
+  let scripts: unknown[]
+  try {
+    const result = await generateMoreScripts({ niche: creator.primaryNiche, idea: idea ?? 'trending content' })
+    scripts = result
+  } catch (err) {
+    console.error('[scripts/daily] AI error:', err)
+    res.status(502).json({ error: 'ai_service_unavailable', message: 'Script generation failed' })
     return
   }
-
-  const { scripts } = await aiResponse.json() as { scripts: unknown[] }
   await persistAndCache({ creatorId, date, scripts, cacheKey })
   await recordDailyAction(creatorId).catch((err) => { console.error('[scripts/daily] streak record failed:', err) })
   res.status(200).json({ date, scripts, cached: false })

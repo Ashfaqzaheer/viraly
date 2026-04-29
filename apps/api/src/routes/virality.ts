@@ -1,9 +1,8 @@
 import { Router, Request, Response } from 'express'
 import { prisma } from '@viraly/db'
+import { predictVirality } from '../lib/groq'
 
 const router = Router()
-
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL ?? 'http://localhost:8000'
 
 // ---------------------------------------------------------------------------
 // POST /virality/predict/:reelSubmissionId
@@ -36,21 +35,10 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
 
   const callAI = async (): Promise<{ ok: true; data: typeof aiResult } | { ok: false; message: string }> => {
     try {
-      const aiResponse = await fetch(`${AI_SERVICE_URL}/predict-virality`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(15000),
-        body: JSON.stringify({ url: submission.url }),
-      })
-
-      if (!aiResponse.ok) {
-        const body = await aiResponse.json().catch(() => ({})) as { message?: string }
-        return { ok: false, message: body.message as string ?? 'Virality prediction failed' }
-      }
-
-      const data = await aiResponse.json() as typeof aiResult
+      const data = await predictVirality({ url: submission.url })
       return { ok: true, data }
-    } catch (err) { console.error("[virality] AI call error:", err)
+    } catch (err) {
+      console.error("[virality] AI call error:", err)
       return { ok: false, message: 'Could not reach AI service' }
     }
   }

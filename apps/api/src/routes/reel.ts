@@ -1,10 +1,9 @@
 import { Router, Request, Response } from 'express'
 import { prisma } from '@viraly/db'
 import { recordDailyAction } from '../services/streak'
+import { analyzeReel } from '../lib/groq'
 
 const router = Router()
-
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL ?? 'http://localhost:8000'
 
 // ---------------------------------------------------------------------------
 // Domain validation helper
@@ -79,31 +78,13 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
   // Call AI service for feedback
   let feedback: unknown
   try {
-    const aiResponse = await fetch(`${AI_SERVICE_URL}/analyze-reel`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(15000),
-      body: JSON.stringify({ url }),
-    })
-
-    if (!aiResponse.ok) {
-      const body = await aiResponse.json().catch(() => ({})) as { message?: string }
-      // Clean up the submission record since AI failed
-      await prisma.reelSubmission.delete({ where: { id: submission.id } })
-      res.status(502).json({
-        error: 'ai_service_unavailable',
-        message: body.message ?? 'Reel analysis failed',
-      })
-      return
-    }
-
-    feedback = await aiResponse.json()
+    feedback = await analyzeReel({ url })
   } catch (err) {
-    // Network error — clean up and return 502
+    // AI error — clean up and return 502
     await prisma.reelSubmission.delete({ where: { id: submission.id } })
     res.status(502).json({
       error: 'ai_service_unavailable',
-      message: 'Could not reach AI service',
+      message: 'Reel analysis failed',
     })
     return
   }
