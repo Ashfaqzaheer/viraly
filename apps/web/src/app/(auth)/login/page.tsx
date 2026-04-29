@@ -13,7 +13,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 }
 
 export default function LoginPage() {
-  const { login, creator } = useAuth()
+  const { login, creator, isLoading } = useAuth()
   const router = useRouter()
 
   const [email, setEmail] = useState('')
@@ -36,14 +36,14 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    if (creator) {
+    if (!isLoading && creator) {
       if (creator.onboardingComplete === false) {
         router.push('/onboarding')
       } else {
         router.push('/dashboard')
       }
     }
-  }, [creator, router])
+  }, [creator, router, isLoading])
 
   function handleGoogleLogin() {
     window.location.href = `${API_BASE}/api/auth/google`
