@@ -5,7 +5,9 @@
 import { prisma } from '@viraly/db'
 import redis from '../lib/redis'
 
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL ?? 'http://localhost:8000'
+const AI_PROVIDER_URL = process.env.AI_PROVIDER_URL ?? 'https://api.groq.com/openai/v1/chat/completions'
+const AI_PROVIDER_KEY = process.env.AI_PROVIDER_KEY ?? ''
+const AI_MODEL = process.env.AI_MODEL ?? 'llama-3.3-70b-versatile'
 const TREND_CACHE_TTL = 3600
 const STALE_THRESHOLD_MS = 48 * 60 * 60 * 1000
 
@@ -108,18 +110,26 @@ export async function getTrends(niche?: string): Promise<{ trends: Trend[]; isFa
  * Requirements: 7.1, 7.5
  */
 export async function refreshTrends(): Promise<void> {
-  const aiResponse = await fetch(`${AI_SERVICE_URL}/refresh-trends`, {
+  const aiResponse = await fetch(AI_PROVIDER_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${AI_PROVIDER_KEY}` },
     signal: AbortSignal.timeout(15000),
+    body: JSON.stringify({
+      model: AI_MODEL,
+      messages: [
+        { role: 'system', content: 'You are a social media trend analyst. Respond with valid JSON only.' },
+        { role: 'user', content: 'Generate 10 trending content formats for TikTok/Reels creators.\nReturn JSON: {"trends":[{"title":"...","description":"...","exampleFormat":"...","engagementLiftPercent":25,"niche":"general"}]}' }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    }),
   })
 
-  if (!aiResponse.ok) {
-    const body = await aiResponse.json().catch(() => ({})) as { message?: string }
-    throw new Error(body.message ?? 'Trend refresh failed')
-  }
+  if (!aiResponse.ok) throw new Error(`Trend refresh failed: ${aiResponse.status}`)
 
-  const { trends } = await aiResponse.json() as {
+  const data = await aiResponse.json() as { choices: { message: { content: string } }[] }
+  const raw = data.choices[0]?.message?.content ?? '{}'
+  const { trends } = JSON.parse(raw.replace(/```json|```/g, '').trim()) as {
     trends: Array<{
       title: string
       description: string
