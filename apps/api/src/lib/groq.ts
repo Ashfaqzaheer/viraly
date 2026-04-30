@@ -83,11 +83,11 @@ export async function generateFullGuide(params: {
 }): Promise<Record<string, unknown>> {
   const { niche, idea, hook, concept } = params
 
-  const system = `You are a professional Instagram Reels shooting guide creator for the ${niche} niche. Create a detailed execution guide.
-Return ONLY valid JSON:
-{"hook": "${hook}", "concept": "${concept}", "scenes": [{"sceneNumber": 1, "duration": "0-3s", "action": "...", "dialogue": "...", "cameraAngle": "...", "lighting": "...", "props": "..."}], "audioSuggestion": "...", "editingTips": ["..."], "thumbnailIdea": "...", "bestTimeToPost": "...", "estimatedTotalDuration": "..."}`
+  const system = `You are a professional Instagram Reels shooting guide creator for the ${niche} niche.
+Return ONLY valid JSON with this exact structure, no markdown:
+{"title": "reel title", "hook": "opening hook line", "concept": "content concept", "whyViral": "why this will go viral", "duration": "30 seconds", "voiceType": "energetic and motivational", "scenes": [{"sceneNumber": 1, "duration": "0-3s", "action": "...", "dialogue": "...", "cameraAngle": "...", "sound": "...", "lightingTip": "...", "editingTip": "..."}], "caption": "full post caption", "hashtags": ["hashtag1", "hashtag2"], "trendingAudio": ["song1", "song2"], "proTips": ["tip1", "tip2"], "whyItWorks": ["reason1", "reason2"], "subtitlesSuggestion": "subtitle recommendation", "editingNotes": "overall editing notes", "callToAction": "end call to action"}`
 
-  const user = `Create a full shooting guide for this reel:\nIdea: ${idea}\nHook: ${hook}\nConcept: ${concept}`
+  const user = `Create a complete shooting guide:\nIdea: ${idea}\nHook: ${hook}\nConcept: ${concept}\nNiche: ${niche}\nInclude 5-7 scenes.`
   return await callAI(system, user, 0.7)
 }
 
