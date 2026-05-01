@@ -12,7 +12,13 @@ function stripCodeFences(text: string): string {
   return text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
 }
 
-async function callAI(systemPrompt: string, userPrompt: string, temperature = 0.8): Promise<any> {
+async function callAI(systemPrompt: string, userPrompt: string, temperature = 0.85): Promise<any> {
+  if (!AI_KEY) {
+    throw new Error('AI_PROVIDER_KEY not configured — cannot generate content')
+  }
+
+  console.log(`[groq] Calling ${AI_MODEL} | temp=${temperature} | prompt=${userPrompt.slice(0, 80)}...`)
+
   const res = await fetch(AI_URL, {
     method: 'POST',
     headers: {
@@ -27,12 +33,14 @@ async function callAI(systemPrompt: string, userPrompt: string, temperature = 0.
         { role: 'user', content: userPrompt },
       ],
       temperature,
+      top_p: 0.9,
       max_tokens: 4096,
     }),
   })
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
+    console.error(`[groq] API error ${res.status}: ${body.slice(0, 200)}`)
     throw new Error(`AI API error ${res.status}: ${body.slice(0, 200)}`)
   }
 
@@ -40,7 +48,14 @@ async function callAI(systemPrompt: string, userPrompt: string, temperature = 0.
   const content = data.choices?.[0]?.message?.content
   if (!content) throw new Error('Empty AI response')
 
-  return JSON.parse(stripCodeFences(content))
+  console.log(`[groq] Response received | length=${content.length}`)
+
+  try {
+    return JSON.parse(stripCodeFences(content))
+  } catch (parseErr) {
+    console.error(`[groq] JSON parse failed: ${(parseErr as Error).message} | raw=${content.slice(0, 200)}`)
+    throw new Error('AI returned invalid JSON')
+  }
 }
 
 // ── Script Generation ────────────────────────────────────────────────────────
@@ -54,6 +69,7 @@ export async function generateInitialScript(params: {
     : ''
 
   const system = `You are a viral Instagram Reels script writer for the ${niche} niche. Generate ONE script that maximizes engagement.${trendInfo}
+IMPORTANT: Generate a fresh, original script. Do NOT use common examples like "30-day challenge", "100 pushups", or "squats every day". Be creative and unique.
 Return ONLY valid JSON with this structure:
 {"hook": "opening line", "concept": "brief concept", "script": "full script text", "hashtags": ["tag1","tag2"], "estimatedDuration": "30-60s", "trendAlignment": "why this aligns with current trends"}`
 
@@ -70,6 +86,7 @@ export async function generateMoreScripts(params: {
     : ''
 
   const system = `You are a viral Instagram Reels script writer for the ${niche} niche. Generate exactly 3 DIFFERENT scripts with unique angles.${trendInfo}
+IMPORTANT: Each script must be completely different. Avoid generic examples like "30-day challenges" or "100 reps every day". Be creative and surprising.
 Return ONLY valid JSON array:
 [{"hook": "...", "concept": "...", "script": "...", "hashtags": [...], "estimatedDuration": "...", "angle": "what makes this unique"}, ...]`
 
