@@ -55,59 +55,54 @@ export default function OnboardingPage() {
     } catch { setError('Something went wrong.') } finally { setLoading(false) }
   }
 
-  if (fetching) return <div className="min-h-screen flex items-center justify-center"><div className="flex items-center gap-3"><span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin" /><span className="text-sm text-white/40">Loading...</span></div></div>
-
-  const inputCls = (err: boolean) => `w-full rounded-xl border ${err ? 'border-red-500/50' : 'border-white/10'} bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 backdrop-blur-sm transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 hover:border-white/20`
+  if (fetching) return <div className="min-h-screen flex items-center justify-center bg-black"><div className="flex items-center gap-3"><span className="spinner" /><span className="text-sm text-text-muted">Loading...</span></div></div>
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-12">
-      <div className="orb w-[500px] h-[500px] bg-violet-600 top-[-150px] left-[-100px] animate-float" />
-      <div className="orb w-[400px] h-[400px] bg-cyan-500 bottom-[-100px] right-[-80px] animate-float-delayed" />
-
-      <div className="relative z-10 w-full max-w-lg animate-fade-in">
-        <div className="glass-strong rounded-3xl p-8 sm:p-10">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-black">
+      <div className="w-full max-w-lg">
+        <div className="bg-surface-card border border-hairline p-8 sm:p-10">
           <div className="mb-6">
-            <p className="text-xs font-medium text-violet-400 uppercase tracking-wider mb-2">Step {step} of {TOTAL_STEPS}</p>
-            <div className="flex gap-1 mb-5">{Array.from({ length: TOTAL_STEPS }).map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i < step ? 'bg-gradient-to-r from-violet-500 to-cyan-500' : 'bg-white/10'}`} />)}</div>
-            <h1 className="text-2xl font-bold text-white">{step === 1 ? 'Tell us about yourself' : 'Your goals & audience'}</h1>
-            <p className="text-sm text-white/40 mt-1">{step === 1 ? 'Help us personalise your experience.' : 'Almost done — just a couple more details.'}</p>
+            <p className="spec-label text-accent mb-2">Step {step} of {TOTAL_STEPS}</p>
+            <div className="flex gap-1 mb-5">{Array.from({ length: TOTAL_STEPS }).map((_, i) => <div key={i} className={`h-1 flex-1 transition-all duration-500 ${i < step ? 'bg-accent' : 'bg-hairline'}`} />)}</div>
+            <h1 className="text-display-sm uppercase font-bold text-white">{step === 1 ? 'Tell Us About Yourself' : 'Your Goals & Audience'}</h1>
+            <p className="text-body-sm text-text-muted mt-1">{step === 1 ? 'Help us personalise your experience.' : 'Almost done — just a couple more details.'}</p>
           </div>
 
-          {error && <div role="alert" className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
+          {error && <div role="alert" className="mb-5 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
 
           {step === 1 && (
             <form onSubmit={handleNext} noValidate className="space-y-5">
-              <div><label htmlFor="displayName" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Display name <span className="text-red-400">*</span></label><input id="displayName" type="text" value={form.displayName} onChange={e => update('displayName', e.target.value)} placeholder="e.g. Alex Rivera" className={inputCls(!!fieldErrors.displayName)} />{fieldErrors.displayName && <p className="mt-1 text-xs text-red-400">{fieldErrors.displayName}</p>}</div>
-              <div><label htmlFor="primaryNiche" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Primary niche <span className="text-red-400">*</span></label><select id="primaryNiche" value={form.primaryNiche} onChange={e => update('primaryNiche', e.target.value)} className={inputCls(!!fieldErrors.primaryNiche)}><option value="">Select a niche...</option>{NICHES.map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}</select>{fieldErrors.primaryNiche && <p className="mt-1 text-xs text-red-400">{fieldErrors.primaryNiche}</p>}</div>
-              <div><label htmlFor="secondaryNiche" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Secondary niche <span className="text-white/20 normal-case tracking-normal">(optional)</span></label><select id="secondaryNiche" value={form.secondaryNiche} onChange={e => update('secondaryNiche', e.target.value)} className={inputCls(false)}><option value="">None</option>{NICHES.filter(n => n !== form.primaryNiche).map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}</select></div>
-              <button type="submit" className="btn-premium w-full rounded-xl px-4 py-3.5 text-sm font-semibold text-white">Next</button>
+              <div><label htmlFor="displayName" className="label">Display name <span className="text-red-400">*</span></label><input id="displayName" type="text" value={form.displayName} onChange={e => update('displayName', e.target.value)} placeholder="e.g. Alex Rivera" className={`input ${fieldErrors.displayName ? 'border-red-500' : ''}`} />{fieldErrors.displayName && <p className="mt-1 text-xs text-red-400">{fieldErrors.displayName}</p>}</div>
+              <div><label htmlFor="primaryNiche" className="label">Primary niche <span className="text-red-400">*</span></label><select id="primaryNiche" value={form.primaryNiche} onChange={e => update('primaryNiche', e.target.value)} className={`input ${fieldErrors.primaryNiche ? 'border-red-500' : ''}`}><option value="">Select a niche...</option>{NICHES.map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}</select>{fieldErrors.primaryNiche && <p className="mt-1 text-xs text-red-400">{fieldErrors.primaryNiche}</p>}</div>
+              <div><label htmlFor="secondaryNiche" className="label">Secondary niche <span className="text-text-muted normal-case tracking-normal font-normal">(optional)</span></label><select id="secondaryNiche" value={form.secondaryNiche} onChange={e => update('secondaryNiche', e.target.value)} className="input"><option value="">None</option>{NICHES.filter(n => n !== form.primaryNiche).map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}</select></div>
+              <button type="submit" className="btn-primary w-full">NEXT</button>
             </form>
           )}
 
           {step === 2 && (
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
               <div>
-                <label htmlFor="instagramHandle" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Instagram handle <span className="text-white/20 normal-case tracking-normal">(optional)</span></label>
-                <div className="flex"><span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-white/10 bg-white/5 text-white/30 text-sm">@</span><input id="instagramHandle" type="text" value={form.instagramHandle} onChange={e => update('instagramHandle', e.target.value)} placeholder="yourhandle" className="flex-1 rounded-r-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 hover:border-white/20" /></div>
+                <label htmlFor="instagramHandle" className="label">Instagram handle <span className="text-text-muted normal-case tracking-normal font-normal">(optional)</span></label>
+                <div className="flex"><span className="inline-flex items-center px-3 border border-r-0 border-hairline bg-surface-soft text-text-muted text-sm">@</span><input id="instagramHandle" type="text" value={form.instagramHandle} onChange={e => update('instagramHandle', e.target.value)} placeholder="yourhandle" className="input flex-1" /></div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Follower range <span className="text-red-400">*</span></label>
+                <label className="label">Follower range <span className="text-red-400">*</span></label>
                 <div className="grid grid-cols-2 gap-2">{FOLLOWER_RANGES.map(({ value, label }) => (
-                  <button key={value} type="button" onClick={() => update('followerCountRange', value)} className={`rounded-xl border px-3 py-2.5 text-sm font-medium text-left transition-all ${form.followerCountRange === value ? 'border-violet-500/50 bg-violet-500/10 text-violet-300' : 'border-white/10 bg-white/[0.03] text-white/50 hover:border-white/20 hover:text-white/70'}`}>{label}</button>
+                  <button key={value} type="button" onClick={() => update('followerCountRange', value)} className={`border px-3 py-2.5 text-sm font-bold text-left transition-colors ${form.followerCountRange === value ? 'border-accent text-accent bg-accent/10' : 'border-hairline bg-surface-soft text-text-muted hover:border-white hover:text-white'}`}>{label}</button>
                 ))}</div>
                 {fieldErrors.followerCountRange && <p className="mt-1 text-xs text-red-400">{fieldErrors.followerCountRange}</p>}
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Primary goal <span className="text-red-400">*</span></label>
+                <label className="label">Primary goal <span className="text-red-400">*</span></label>
                 <div className="space-y-2">{GOALS.map(goal => (
-                  <button key={goal} type="button" onClick={() => update('primaryGoal', goal)} className={`w-full rounded-xl border px-4 py-2.5 text-sm font-medium text-left transition-all ${form.primaryGoal === goal ? 'border-violet-500/50 bg-violet-500/10 text-violet-300' : 'border-white/10 bg-white/[0.03] text-white/50 hover:border-white/20 hover:text-white/70'}`}>{goal}</button>
+                  <button key={goal} type="button" onClick={() => update('primaryGoal', goal)} className={`w-full border px-4 py-2.5 text-sm font-bold text-left transition-colors ${form.primaryGoal === goal ? 'border-accent text-accent bg-accent/10' : 'border-hairline bg-surface-soft text-text-muted hover:border-white hover:text-white'}`}>{goal}</button>
                 ))}</div>
                 {fieldErrors.primaryGoal && <p className="mt-1 text-xs text-red-400">{fieldErrors.primaryGoal}</p>}
               </div>
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setStep(1)} className="flex-1 glass rounded-xl px-4 py-3.5 text-sm font-semibold text-white/60 hover:text-white transition">Back</button>
-                <button type="submit" disabled={loading} className="flex-1 btn-premium rounded-xl px-4 py-3.5 text-sm font-semibold text-white disabled:opacity-50">
-                  {loading ? 'Saving...' : 'Finish setup'}
+                <button type="button" onClick={() => setStep(1)} className="btn-secondary flex-1">BACK</button>
+                <button type="submit" disabled={loading} className="btn-primary flex-1">
+                  {loading ? 'SAVING...' : 'FINISH SETUP'}
                 </button>
               </div>
             </form>

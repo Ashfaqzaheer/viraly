@@ -19,10 +19,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`dark ${inter.variable}`}>
       <body className="min-h-screen antialiased font-sans">
-        {/* Aurora background blobs */}
-        <div className="aurora-1" />
-        <div className="aurora-2" />
-        <div className="aurora-3" />
         <AuthProvider>
           <Header />
           <div className="relative z-10">{children}</div>

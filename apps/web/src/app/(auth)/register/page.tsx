@@ -51,37 +51,26 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
-      {/* Grid pattern overlay */}
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-md animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-black">
+      <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition group-hover:shadow-violet-500/40 group-hover:scale-105">
-              V
-            </div>
-            <span className="text-2xl font-bold tracking-tight text-white">Viraly</span>
+        <div className="flex justify-center mb-10">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span className="text-display-md text-white font-bold uppercase">VIRALY</span>
           </Link>
         </div>
 
         {/* Card */}
-        <div className="card-3d glass-strong rounded-3xl p-8 sm:p-10">
+        <div className="bg-surface-card border border-hairline p-8 sm:p-10">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-1.5">Create your account</h1>
-            <p className="text-sm text-white/40">Start growing your audience with AI</p>
+            <h1 className="text-display-sm uppercase font-bold text-white mb-1.5">Create Account</h1>
+            <p className="text-body-sm text-text-muted">Start growing your audience with AI</p>
           </div>
 
           {error && (
             <div
               role="alert"
-              className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300 backdrop-blur-sm"
+              className="mb-5 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
             >
               {error}
             </div>
@@ -89,7 +78,7 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">
+              <label htmlFor="email" className="label">
                 Email
               </label>
               <input
@@ -99,15 +88,15 @@ export default function RegisterPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 backdrop-blur-sm transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 focus:bg-white/[0.07] hover:border-white/20"
+                className="input"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">
+              <label htmlFor="password" className="label">
                 Password
-                <span className="ml-1.5 normal-case tracking-normal text-white/25">(min. 8 characters)</span>
+                <span className="ml-1.5 normal-case tracking-normal text-text-muted font-normal">(min. 8 characters)</span>
               </label>
               <div className="relative">
                 <input
@@ -119,13 +108,13 @@ export default function RegisterPage() {
                   key={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="password-morph password-morph-enter w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-11 text-sm text-white placeholder-white/20 backdrop-blur-sm transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 focus:bg-white/[0.07] hover:border-white/20"
+                  className="input pr-11"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -138,16 +127,16 @@ export default function RegisterPage() {
                     {[1, 2, 3, 4].map((level) => (
                       <div
                         key={level}
-                        className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                        className={`h-1 flex-1 transition-all duration-300 ${
                           level <= passwordStrength.level
-                            ? passwordStrength.level <= 1 ? 'bg-red-500' : passwordStrength.level <= 2 ? 'bg-amber-500' : passwordStrength.level <= 3 ? 'bg-cyan-400' : 'bg-emerald-400'
-                            : 'bg-white/10'
+                            ? passwordStrength.level <= 1 ? 'bg-red-500' : passwordStrength.level <= 2 ? 'bg-amber-500' : passwordStrength.level <= 3 ? 'bg-accent' : 'bg-emerald-400'
+                            : 'bg-hairline'
                         }`}
                       />
                     ))}
                   </div>
                   <p className={`text-xs ${
-                    passwordStrength.level <= 1 ? 'text-red-400/70' : passwordStrength.level <= 2 ? 'text-amber-400/70' : passwordStrength.level <= 3 ? 'text-cyan-400/70' : 'text-emerald-400/70'
+                    passwordStrength.level <= 1 ? 'text-red-400' : passwordStrength.level <= 2 ? 'text-amber-400' : passwordStrength.level <= 3 ? 'text-accent' : 'text-emerald-400'
                   }`}>
                     {passwordStrength.label}
                   </p>
@@ -158,44 +147,44 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-premium w-full rounded-xl px-4 py-3.5 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  Creating account...
+                  <span className="spinner" />
+                  CREATING ACCOUNT...
                 </span>
               ) : (
-                'Create account'
+                'CREATE ACCOUNT'
               )}
             </button>
           </form>
 
           <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="text-xs text-white/25 uppercase tracking-wider">or</span>
-            <div className="flex-1 h-px bg-white/10" />
+            <div className="flex-1 h-px bg-hairline" />
+            <span className="text-xs text-text-muted uppercase tracking-[1.5px]">or</span>
+            <div className="flex-1 h-px bg-hairline" />
           </div>
 
           <button
             type="button"
             onClick={handleGoogleRegister}
-            className="w-full flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/70 backdrop-blur-sm transition hover:bg-white/10 hover:border-white/20 hover:text-white focus:outline-none focus:ring-1 focus:ring-violet-500/30"
+            className="btn-secondary w-full gap-3"
           >
             <GoogleIcon />
-            Continue with Google
+            CONTINUE WITH GOOGLE
           </button>
 
-          <p className="mt-7 text-center text-sm text-white/30">
+          <p className="mt-7 text-center text-sm text-text-muted">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-violet-400 hover:text-violet-300 transition">
+            <Link href="/login" className="font-bold text-white hover:text-accent transition-colors">
               Log in
             </Link>
           </p>
         </div>
 
         {/* Trust badges */}
-        <div className="mt-6 flex items-center justify-center gap-6 text-white/15 text-xs">
+        <div className="mt-6 flex items-center justify-center gap-6 text-text-muted text-xs">
           <span className="flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
             Encrypted
