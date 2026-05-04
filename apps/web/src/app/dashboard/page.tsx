@@ -13,14 +13,14 @@ interface Reward { days: number; label: string; unlocks: string }
 interface MissionResponse { mission: Mission; streak: StreakData; rewards: { unlocked: Reward[]; next: Reward | null } }
 
 const features = [
-  { href: "/scripts", label: "Scripts", desc: "Trend-powered viral scripts" },
-  { href: "/reels", label: "Reel Feedback", desc: "Submit reels for AI analysis" },
-  { href: "/virality", label: "Virality Engine", desc: "Analyze and improve your reels" },
-  { href: "/trends", label: "Trend Radar", desc: "See what\u2019s trending now" },
-  { href: "/hooks", label: "Hook Library", desc: "Browse proven viral hooks" },
-  { href: "/analytics", label: "Analytics", desc: "View your growth metrics" },
-  { href: "/monetization", label: "Monetization", desc: "Learn to monetize your audience" },
-  { href: "/streak", label: "Streak", desc: "Track your posting consistency" },
+  { href: "/scripts", label: "Scripts", desc: "Trend-powered viral scripts", icon: "✍️" },
+  { href: "/reels", label: "Reel feedback", desc: "Submit reels for AI analysis", icon: "🎬" },
+  { href: "/virality", label: "Virality engine", desc: "Analyze and improve your reels", icon: "🚀" },
+  { href: "/trends", label: "Trend radar", desc: "See what's trending now", icon: "📈" },
+  { href: "/hooks", label: "Hook library", desc: "Browse proven viral hooks", icon: "🪝" },
+  { href: "/analytics", label: "Analytics", desc: "View your growth metrics", icon: "📊" },
+  { href: "/monetization", label: "Monetization", desc: "Learn to monetize your audience", icon: "💰" },
+  { href: "/streak", label: "Streak", desc: "Track your posting consistency", icon: "🔥" },
 ]
 
 export default function DashboardPage() {
@@ -56,87 +56,88 @@ export default function DashboardPage() {
   const nextReward = missionData?.rewards?.next
 
   return (
-    <div className="min-h-screen" style={{ background: '#000000' }}>
-      {creator?.onboardingComplete === false && (
-        <div className="editorial-container pt-4">
-          <div className="border border-amber-500/30 px-5 py-3 flex items-center justify-between">
-            <span className="text-sm text-amber-200" style={{ fontWeight: 300 }}>Your profile is incomplete. Finish setup to unlock all features.</span>
-            <Link href="/onboarding" className="nav-item text-amber-300 hover:text-white whitespace-nowrap">COMPLETE PROFILE {"\u2192"}</Link>
+    <div className="min-h-screen animate-fade-in">
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        {creator?.onboardingComplete === false && (
+          <div className="mb-6 glass rounded-2xl border-amber-500/20 bg-amber-500/5 px-5 py-4 flex items-center justify-between">
+            <span className="text-sm text-amber-200">Your profile is incomplete. Finish setup to unlock all features.</span>
+            <Link href="/onboarding" className="text-sm font-medium text-amber-300 hover:text-white transition whitespace-nowrap">Complete profile →</Link>
           </div>
-        </div>
-      )}
+        )}
 
-      <main className="editorial-container">
-        {/* ═══ STREAK HERO BAND ═══ */}
+        {/* Streak section */}
         {streak && (
-          <section style={{ borderBottom: '1px solid #262626', padding: '48px 0' }}>
-            <p className="section-label mb-4">CONSISTENCY</p>
-            <h1>{streak.current} DAYS</h1>
-            <div className="flex items-center gap-8 mt-6">
-              <div className="spec-cell">
-                <p className="spec-value text-accent">{streak.current}</p>
-                <p className="spec-label">CURRENT STREAK</p>
-              </div>
-              <div className="spec-cell">
-                <p className="spec-value">{streak.highest}</p>
-                <p className="spec-label">ALL-TIME BEST</p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ═══ TODAY'S MISSION ═══ */}
-        {mission && (
-          <section style={{ paddingTop: '48px', paddingBottom: '48px' }}>
-            <div className="streak-card">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="section-label">{mission.completed ? "\u2705" : "\u{1F525}"} TODAY&apos;S MISSION</span>
-                {mission.completed && <span className="tag-accent">COMPLETED</span>}
-              </div>
-              <h5 className="mb-2">{mission.hook}</h5>
-              <p className="text-sm text-body" style={{ fontWeight: 300 }}>{mission.concept}</p>
-
-              {nextReward && !mission.completed && (
-                <p className="text-xs text-muted mt-4">Next unlock: {nextReward.label} at Day {nextReward.days}</p>
-              )}
-
-              <div className="flex gap-3 mt-6">
-                {!mission.completed ? (
-                  <>
-                    <button onClick={handleCompleteMission} disabled={completing} className="btn-primary">
-                      {completing ? "COMPLETING..." : "I POSTED THIS"}
-                    </button>
-                    <Link href={`/scripts?idea=${encodeURIComponent(mission.hook)}`} className="btn-ghost">
-                      GENERATE SCRIPT
-                    </Link>
-                  </>
-                ) : (
-                  <p className="text-sm text-emerald-400" style={{ fontWeight: 300 }}>Great work! Come back tomorrow for your next mission.</p>
-                )}
-              </div>
-
-              {streak && streak.current === 0 && streak.highest > 0 && (
-                <div className="mt-4 border border-red-500/30 p-3">
-                  <p className="text-xs text-red-400" style={{ fontWeight: 300 }}>You lost your {streak.highest}-day streak! Complete today{"\u2019"}s mission to start rebuilding.</p>
+          <div className="glass rounded-2xl p-6 mb-6">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🔥</span>
+                <div>
+                  <p className="text-3xl font-bold text-white">{streak.current}</p>
+                  <p className="text-xs text-white/40">day streak</p>
                 </div>
-              )}
+              </div>
+              <div className="h-10 w-px bg-white/[0.08]" />
+              <div>
+                <p className="text-lg font-semibold text-white/70">{streak.highest}</p>
+                <p className="text-xs text-white/40">best</p>
+              </div>
             </div>
-          </section>
+          </div>
         )}
 
-        {/* ═══ FEATURE GRID ═══ */}
-        <section style={{ paddingTop: '48px', paddingBottom: '120px' }}>
-          <p className="section-label mb-6">TOOLS</p>
-          <nav className="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-3" style={{ background: '#262626' }}>
-            {features.map((item) => (
-              <Link key={item.href} href={item.href}
-                className="group p-6 transition-colors hover:bg-surface-elevated" style={{ background: '#141414' }}>
-                <h6 className="group-hover:text-accent transition-colors">{item.label}</h6>
-                <p className="text-xs text-muted mt-2" style={{ fontWeight: 300 }}>{item.desc}</p>
-              </Link>
-            ))}
-          </nav>
-        </section>
+        {/* Today's Mission */}
+        {mission && (
+          <div className="glass-strong rounded-2xl p-6 mb-8 border-l-2 border-violet-500/50">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm">{mission.completed ? "✅" : "🎯"}</span>
+              <span className="text-xs font-medium text-white/50 uppercase tracking-wider">Today&apos;s mission</span>
+              {mission.completed && (
+                <span className="ml-2 px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-300 font-medium uppercase">Completed</span>
+              )}
+            </div>
+            <h2 className="text-lg font-semibold text-white mb-1">{mission.hook}</h2>
+            <p className="text-sm text-white/50 mb-4">{mission.concept}</p>
+
+            {nextReward && !mission.completed && (
+              <p className="text-xs text-white/30 mb-4">Next unlock: {nextReward.label} at Day {nextReward.days}</p>
+            )}
+
+            <div className="flex gap-3">
+              {!mission.completed ? (
+                <>
+                  <button onClick={handleCompleteMission} disabled={completing}
+                    className="btn-premium rounded-xl px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">
+                    {completing ? "Completing..." : "I posted this"}
+                  </button>
+                  <Link href={`/scripts?idea=${encodeURIComponent(mission.hook)}`}
+                    className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:border-white/20 transition">
+                    Generate script
+                  </Link>
+                </>
+              ) : (
+                <p className="text-sm text-emerald-400">Great work! Come back tomorrow for your next mission.</p>
+              )}
+            </div>
+
+            {streak && streak.current === 0 && streak.highest > 0 && (
+              <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/5 p-3">
+                <p className="text-xs text-red-300">You lost your {streak.highest}-day streak! Complete today&apos;s mission to start rebuilding.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Feature grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {features.map((item) => (
+            <Link key={item.href} href={item.href}
+              className="card-3d glass rounded-2xl p-5 group transition-all hover:bg-white/[0.05] hover:border-white/[0.12]">
+              <span className="text-2xl mb-3 block">{item.icon}</span>
+              <h3 className="text-sm font-medium text-white group-hover:text-violet-300 transition">{item.label}</h3>
+              <p className="text-xs text-white/40 mt-1">{item.desc}</p>
+            </Link>
+          ))}
+        </div>
       </main>
     </div>
   )

@@ -11,11 +11,11 @@ interface ReelFeedback { scores: FeedbackScores; commentary: FeedbackCommentary 
 interface Submission { id: string; url: string; feedback: ReelFeedback | null; submittedAt: string }
 
 const SCORE_LABELS: { key: keyof FeedbackScores; label: string }[] = [
-  { key: 'hookStrength', label: 'HOOK STRENGTH' },
-  { key: 'pacing', label: 'PACING' },
-  { key: 'captionQuality', label: 'CAPTION QUALITY' },
-  { key: 'hashtagRelevance', label: 'HASHTAG RELEVANCE' },
-  { key: 'ctaEffectiveness', label: 'CTA EFFECTIVENESS' },
+  { key: 'hookStrength', label: 'Hook strength' },
+  { key: 'pacing', label: 'Pacing' },
+  { key: 'captionQuality', label: 'Caption quality' },
+  { key: 'hashtagRelevance', label: 'Hashtag relevance' },
+  { key: 'ctaEffectiveness', label: 'CTA effectiveness' },
 ]
 const MAX_DAILY = 10
 
@@ -50,20 +50,20 @@ export default function ReelsPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#000000' }}>
-      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px', maxWidth: '800px' }}>
-        <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
-        <p className="section-label mb-2">AI FEEDBACK</p>
-        <h3 className="mb-2">Reel feedback</h3>
-        <p className="text-sm text-muted mb-8" style={{ fontWeight: 300 }}>{remaining} of {MAX_DAILY} submissions remaining today</p>
+    <div className="min-h-screen">
+      <main className="max-w-3xl mx-auto px-6 py-10 animate-fade-in">
+        <Link href="/dashboard" className="text-xs text-white/30 hover:text-white/50 transition mb-2 inline-block">← Dashboard</Link>
+        <h1 className="text-2xl font-bold text-white mb-1">Reel feedback</h1>
+        <p className="text-sm text-white/40 mb-8">{remaining} of {MAX_DAILY} submissions remaining today</p>
 
         {/* Submit form */}
-        <div style={{ background: '#0d0d0d', borderTop: '1px solid #262626', borderBottom: '1px solid #262626', padding: '32px 0' }} className="mb-10">
-          <label htmlFor="reel-url" className="field-label">REEL URL (INSTAGRAM OR TIKTOK)</label>
-          <form onSubmit={handleSubmit} className="flex gap-4 items-end">
-            <input id="reel-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://www.instagram.com/reel/..." required className="input flex-1" />
-            <button type="submit" disabled={submitting || remaining === 0} className="btn-primary shrink-0">
-              {submitting ? 'ANALYZING...' : 'ANALYZE'}
+        <div className="glass-strong rounded-2xl p-6 mb-8">
+          <label htmlFor="reel-url" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Reel URL (Instagram or TikTok)</label>
+          <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+            <input id="reel-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://www.instagram.com/reel/..." required
+              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 hover:border-white/20" />
+            <button type="submit" disabled={submitting || remaining === 0} className="btn-premium rounded-xl px-5 py-3 text-sm font-semibold text-white shrink-0 disabled:opacity-50">
+              {submitting ? 'Analyzing...' : 'Analyze'}
             </button>
           </form>
           {error && <p role="alert" className="mt-3 text-sm text-red-400">{error}</p>}
@@ -71,42 +71,45 @@ export default function ReelsPage() {
 
         {/* Feedback detail */}
         {selected?.feedback && (
-          <div className="mb-10">
-            <p className="caption-upper mb-2">FEEDBACK</p>
-            <p className="text-xs text-muted mb-6 truncate" style={{ fontWeight: 300 }}>{selected.url}</p>
+          <div className="glass rounded-2xl p-6 mb-8 animate-slide-up">
+            <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-1">Feedback</p>
+            <p className="text-xs text-white/30 mb-5 truncate">{selected.url}</p>
             {SCORE_LABELS.map(({ key, label }) => (
-              <div key={key} style={{ borderBottom: '1px solid #262626', padding: '16px 0' }}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="caption-upper">{label}</span>
-                  <span className="text-sm text-white" style={{ fontWeight: 400 }}>{selected.feedback!.scores[key]}/100</span>
+              <div key={key} className="py-3 border-b border-white/[0.06] last:border-0">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs text-white/50">{label}</span>
+                  <span className="text-sm font-medium text-white">{selected.feedback!.scores[key]}/100</span>
                 </div>
-                <div className="progress-track"><div className="progress-fill" style={{ width: `${selected.feedback!.scores[key]}%` }} /></div>
-                <p className="text-xs text-muted mt-2" style={{ fontWeight: 300 }}>{selected.feedback!.commentary[key]}</p>
+                <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-600" style={{ width: `${selected.feedback!.scores[key]}%` }} />
+                </div>
+                <p className="text-xs text-white/30 mt-1.5">{selected.feedback!.commentary[key]}</p>
               </div>
             ))}
           </div>
         )}
 
         {/* History */}
-        <p className="caption-upper mb-4">SUBMISSION HISTORY</p>
-        {loading ? <div className="flex justify-center py-8"><span className="spinner" /></div> : history.length === 0 ? (
-          <p className="text-sm text-muted text-center py-8" style={{ fontWeight: 300 }}>No submissions yet. Submit your first reel above.</p>
-        ) : (
-          <div>
-            {history.map((s) => (
-              <button key={s.id} type="button" onClick={() => setSelected(s)}
-                className="w-full text-left flex items-center justify-between transition-colors hover:bg-surface-card" style={{
-                  borderBottom: '1px solid #262626', padding: '16px 0',
-                  background: selected?.id === s.id ? '#141414' : 'transparent'
-                }}>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm truncate" style={{ fontWeight: 300, color: selected?.id === s.id ? '#ffffff' : '#999999' }}>{s.url}</p>
-                  <p className="text-xs text-muted mt-0.5">{new Date(s.submittedAt).toLocaleString()}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="glass rounded-2xl p-6">
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-4">Submission history</p>
+          {loading ? <div className="flex justify-center py-8"><span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin" /></div> : history.length === 0 ? (
+            <p className="text-sm text-white/40 text-center py-8">No submissions yet. Submit your first reel above.</p>
+          ) : (
+            <div>
+              {history.map((s) => (
+                <button key={s.id} type="button" onClick={() => setSelected(s)}
+                  className={`w-full text-left flex items-center justify-between py-3 border-b border-white/[0.06] last:border-0 transition rounded-lg px-2 -mx-2 ${
+                    selected?.id === s.id ? 'bg-violet-500/5' : 'hover:bg-white/[0.02]'
+                  }`}>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm truncate ${selected?.id === s.id ? 'text-white' : 'text-white/60'}`}>{s.url}</p>
+                    <p className="text-xs text-white/30 mt-0.5">{new Date(s.submittedAt).toLocaleString()}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   )

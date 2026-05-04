@@ -31,58 +31,56 @@ export default function TrendsPage() {
   }, [getToken, niche])
 
   return (
-    <div className="min-h-screen" style={{ background: '#000000' }}>
-      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px' }}>
-        <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
-        <p className="section-label mb-2">CONTENT INTELLIGENCE</p>
-        <h3 className="mb-2">Trend radar</h3>
-        <p className="text-sm text-muted mb-8" style={{ fontWeight: 300 }}>Trending content formats updated daily.</p>
+    <div className="min-h-screen">
+      <main className="max-w-5xl mx-auto px-6 py-10 animate-fade-in">
+        <Link href="/dashboard" className="text-xs text-white/30 hover:text-white/50 transition mb-2 inline-block">← Dashboard</Link>
+        <h1 className="text-2xl font-bold text-white mb-1">Trend radar</h1>
+        <p className="text-sm text-white/40 mb-8">Trending content formats updated daily.</p>
 
         {/* Filter tabs */}
-        <div className="flex flex-wrap gap-2 mb-10">
+        <div className="flex flex-wrap gap-2 mb-8">
           <button type="button" onClick={() => setNiche('')}
-            className={`nav-item px-3 py-1.5 transition-colors ${!niche ? 'text-white' : ''}`}
-            style={{ borderBottom: !niche ? '1px solid #ffffff' : '1px solid transparent' }}>
-            ALL
+            className={`px-3 py-1.5 rounded-lg text-sm transition-all ${!niche ? 'bg-violet-500/10 border border-violet-500/30 text-violet-300' : 'text-white/40 hover:text-white/60 border border-transparent hover:bg-white/[0.03]'}`}>
+            All
           </button>
           {NICHES.map((n) => (
             <button key={n} type="button" onClick={() => setNiche(n)}
-              className={`nav-item px-3 py-1.5 transition-colors ${niche === n ? 'text-white' : ''}`}
-              style={{ borderBottom: niche === n ? '1px solid #ffffff' : '1px solid transparent' }}>
-              {n.toUpperCase()}
+              className={`px-3 py-1.5 rounded-lg text-sm capitalize transition-all ${niche === n ? 'bg-violet-500/10 border border-violet-500/30 text-violet-300' : 'text-white/40 hover:text-white/60 border border-transparent hover:bg-white/[0.03]'}`}>
+              {n}
             </button>
           ))}
         </div>
 
-        {error && <div role="alert" className="mb-6 border border-red-500/30 px-4 py-3 text-sm text-red-400">{error}</div>}
+        {error && <div role="alert" className="mb-6 glass rounded-2xl border-red-500/20 bg-red-500/5 p-4"><p className="text-sm text-red-300">{error}</p></div>}
 
         {isFallback && !loading && trends.length > 0 && (
-          <div className="mb-6 border border-amber-500/30 px-4 py-3">
-            <p className="text-xs text-amber-300" style={{ fontWeight: 300 }}>Showing recent trends (auto-refresh pending)</p>
+          <div className="mb-6 glass rounded-2xl border-amber-500/20 bg-amber-500/5 p-4">
+            <p className="text-sm text-amber-300">Showing recent trends (auto-refresh pending)</p>
           </div>
         )}
 
         {loading ? (
-          <div className="flex items-center gap-3 justify-center py-12"><span className="spinner" /><span className="text-sm text-muted">Loading trends...</span></div>
+          <div className="flex items-center gap-3 justify-center py-16"><span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin" /><span className="text-sm text-white/40">Loading trends...</span></div>
         ) : trends.length === 0 ? (
-          <div className="text-center py-12"><p className="text-sm text-muted">No trends found{niche ? ` for "${niche}"` : ''}.</p></div>
+          <div className="text-center py-16"><p className="text-sm text-white/40">No trends found{niche ? ` for "${niche}"` : ''}.</p></div>
         ) : (
-          <div className="grid gap-px sm:grid-cols-2" style={{ background: '#262626' }}>
+          <div className="grid gap-4 sm:grid-cols-2">
             {trends.map((t) => {
               const stale = isStale(t.updatedAt)
               return (
-                <div key={t.id} className={`transition-all ${stale ? 'opacity-40' : ''}`} style={{ background: '#141414', padding: '24px' }}>
-                  <p className="caption-upper mb-2">{t.niche}</p>
-                  <h5 className="mb-2">{t.title}</h5>
-                  <p className="text-sm text-body mb-3" style={{ fontWeight: 300 }}>{t.description}</p>
-                  <div style={{ borderTop: '1px solid #262626', paddingTop: '12px', marginBottom: '12px' }}>
-                    <p className="caption-upper mb-1">EXAMPLE FORMAT</p>
-                    <p className="text-sm text-body" style={{ fontWeight: 300 }}>{t.exampleFormat}</p>
+                <div key={t.id} className={`glass rounded-2xl p-5 transition-all card-3d ${stale ? 'opacity-40' : ''}`}>
+                  <span className="px-2 py-0.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[10px] text-white/40 uppercase">{t.niche}</span>
+                  <h3 className="text-sm font-semibold text-white mt-3 mb-1">{t.title}</h3>
+                  <p className="text-xs text-white/50 mb-3">{t.description}</p>
+                  <div className="border-t border-white/[0.06] pt-3 mb-3">
+                    <p className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Example format</p>
+                    <p className="text-xs text-white/50">{t.exampleFormat}</p>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-lg text-white" style={{ fontWeight: 400, letterSpacing: '2px' }}>+{t.engagementLiftPercent}%</span>
-                    <Link href={`/scripts?mode=trend&idea=${encodeURIComponent(t.title + ' - ' + t.exampleFormat)}`} className="btn-primary text-xs h-8 px-4">
-                      SCRIPT
+                    <span className="text-lg font-bold text-emerald-400">+{t.engagementLiftPercent}%</span>
+                    <Link href={`/scripts?mode=trend&idea=${encodeURIComponent(t.title + ' - ' + t.exampleFormat)}`}
+                      className="btn-premium rounded-xl px-4 py-2 text-xs font-semibold text-white">
+                      Script →
                     </Link>
                   </div>
                 </div>

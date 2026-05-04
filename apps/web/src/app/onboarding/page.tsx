@@ -54,72 +54,80 @@ export default function OnboardingPage() {
     } catch { setError('Something went wrong.') } finally { setLoading(false) }
   }
 
-  if (fetching) return <div className="min-h-screen flex items-center justify-center" style={{ background: '#000000' }}><span className="spinner" /></div>
+  if (fetching) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin" />
+    </div>
+  )
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: '#000000' }}>
-      <div className="w-full max-w-[560px]">
-        <div style={{ background: '#141414', border: '1px solid #262626', padding: '48px' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-lg animate-fade-in">
+        <div className="glass-strong rounded-3xl p-8 sm:p-10">
           {/* Progress */}
           <div className="mb-8">
-            <p className="caption-upper text-accent mb-3">STEP {step} OF {TOTAL_STEPS}</p>
-            <div className="progress-track flex gap-1">
+            <p className="text-xs font-medium text-violet-400 mb-3">Step {step} of {TOTAL_STEPS}</p>
+            <div className="flex gap-2">
               {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-                <div key={i} className="flex-1 h-[2px] transition-all duration-500" style={{ background: i < step ? '#8b5cf6' : '#262626' }} />
+                <div key={i} className="flex-1 h-1.5 rounded-full transition-all duration-500"
+                  style={{ background: i < step ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : 'rgba(255,255,255,0.06)' }} />
               ))}
             </div>
-            <h4 className="mt-5">{step === 1 ? 'Tell us about yourself' : 'Your goals & audience'}</h4>
-            <p className="text-sm text-muted mt-2" style={{ fontWeight: 300 }}>{step === 1 ? 'Help us personalise your experience.' : 'Almost done — just a couple more details.'}</p>
+            <h1 className="text-xl font-bold text-white mt-5">{step === 1 ? 'Tell us about yourself' : 'Your goals & audience'}</h1>
+            <p className="text-sm text-white/40 mt-1">{step === 1 ? 'Help us personalise your experience.' : 'Almost done — just a couple more details.'}</p>
           </div>
 
-          {error && <div role="alert" className="mb-5 border border-red-500/30 px-4 py-3 text-sm text-red-400">{error}</div>}
+          {error && <div role="alert" className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
 
           {step === 1 && (
-            <form onSubmit={handleNext} noValidate className="space-y-6">
+            <form onSubmit={handleNext} noValidate className="space-y-5">
               <div>
-                <label htmlFor="displayName" className="field-label">DISPLAY NAME <span className="text-red-400">*</span></label>
-                <input id="displayName" type="text" value={form.displayName} onChange={e => update('displayName', e.target.value)} placeholder="e.g. Alex Rivera" className={`input ${fieldErrors.displayName ? 'border-b-red-500' : ''}`} />
+                <label htmlFor="displayName" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Display name <span className="text-red-400">*</span></label>
+                <input id="displayName" type="text" value={form.displayName} onChange={e => update('displayName', e.target.value)} placeholder="e.g. Alex Rivera"
+                  className={`w-full rounded-xl border ${fieldErrors.displayName ? 'border-red-500/50' : 'border-white/10'} bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 hover:border-white/20`} />
                 {fieldErrors.displayName && <p className="mt-1 text-xs text-red-400">{fieldErrors.displayName}</p>}
               </div>
               <div>
-                <label htmlFor="primaryNiche" className="field-label">PRIMARY NICHE <span className="text-red-400">*</span></label>
-                <select id="primaryNiche" value={form.primaryNiche} onChange={e => update('primaryNiche', e.target.value)} className={`input ${fieldErrors.primaryNiche ? 'border-b-red-500' : ''}`}>
-                  <option value="">Select a niche...</option>
-                  {NICHES.map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}
+                <label htmlFor="primaryNiche" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Primary niche <span className="text-red-400">*</span></label>
+                <select id="primaryNiche" value={form.primaryNiche} onChange={e => update('primaryNiche', e.target.value)}
+                  className={`w-full rounded-xl border ${fieldErrors.primaryNiche ? 'border-red-500/50' : 'border-white/10'} bg-white/5 px-4 py-3 text-sm text-white transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 hover:border-white/20 appearance-none`}>
+                  <option value="" className="bg-[#12121a]">Select a niche...</option>
+                  {NICHES.map(n => <option key={n} value={n} className="bg-[#12121a]">{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}
                 </select>
                 {fieldErrors.primaryNiche && <p className="mt-1 text-xs text-red-400">{fieldErrors.primaryNiche}</p>}
               </div>
               <div>
-                <label htmlFor="secondaryNiche" className="field-label">SECONDARY NICHE <span className="text-muted" style={{ textTransform: 'none', letterSpacing: '0' }}>(optional)</span></label>
-                <select id="secondaryNiche" value={form.secondaryNiche} onChange={e => update('secondaryNiche', e.target.value)} className="input">
-                  <option value="">None</option>
-                  {NICHES.filter(n => n !== form.primaryNiche).map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}
+                <label htmlFor="secondaryNiche" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Secondary niche <span className="text-white/20">(optional)</span></label>
+                <select id="secondaryNiche" value={form.secondaryNiche} onChange={e => update('secondaryNiche', e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 hover:border-white/20 appearance-none">
+                  <option value="" className="bg-[#12121a]">None</option>
+                  {NICHES.filter(n => n !== form.primaryNiche).map(n => <option key={n} value={n} className="bg-[#12121a]">{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}
                 </select>
               </div>
-              <button type="submit" className="btn-primary w-full">NEXT</button>
+              <button type="submit" className="btn-premium w-full rounded-xl px-4 py-3.5 text-sm font-semibold text-white">Next</button>
             </form>
           )}
 
           {step === 2 && (
-            <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            <form onSubmit={handleSubmit} noValidate className="space-y-5">
               <div>
-                <label htmlFor="instagramHandle" className="field-label">INSTAGRAM HANDLE <span className="text-muted" style={{ textTransform: 'none', letterSpacing: '0' }}>(optional)</span></label>
-                <div className="flex items-end gap-2">
-                  <span className="text-sm text-muted pb-2">@</span>
-                  <input id="instagramHandle" type="text" value={form.instagramHandle} onChange={e => update('instagramHandle', e.target.value)} placeholder="yourhandle" className="input flex-1" />
+                <label htmlFor="instagramHandle" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Instagram handle <span className="text-white/20">(optional)</span></label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-white/30">@</span>
+                  <input id="instagramHandle" type="text" value={form.instagramHandle} onChange={e => update('instagramHandle', e.target.value)} placeholder="yourhandle"
+                    className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 hover:border-white/20" />
                 </div>
               </div>
               <div>
-                <label className="field-label">FOLLOWER RANGE <span className="text-red-400">*</span></label>
-                <div className="grid grid-cols-2 gap-px" style={{ background: '#262626' }}>
+                <label className="block text-xs font-medium text-white/50 mb-3 uppercase tracking-wider">Follower range <span className="text-red-400">*</span></label>
+                <div className="grid grid-cols-2 gap-2">
                   {FOLLOWER_RANGES.map(({ value, label }) => (
                     <button key={value} type="button" onClick={() => update('followerCountRange', value)}
-                      className="text-left transition-colors" style={{
-                        background: '#000000', padding: '20px 24px',
-                        border: form.followerCountRange === value ? '1px solid #8b5cf6' : 'none',
-                        color: form.followerCountRange === value ? '#8b5cf6' : '#999999',
-                        fontSize: '12px', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '2px'
-                      }}>
+                      className={`rounded-xl px-4 py-3 text-sm transition-all ${
+                        form.followerCountRange === value
+                          ? 'bg-violet-500/10 border border-violet-500/40 text-violet-300'
+                          : 'bg-white/[0.03] border border-white/[0.08] text-white/50 hover:bg-white/[0.05] hover:border-white/[0.12]'
+                      }`}>
                       {label}
                     </button>
                   ))}
@@ -127,16 +135,15 @@ export default function OnboardingPage() {
                 {fieldErrors.followerCountRange && <p className="mt-1 text-xs text-red-400">{fieldErrors.followerCountRange}</p>}
               </div>
               <div>
-                <label className="field-label">PRIMARY GOAL <span className="text-red-400">*</span></label>
-                <div className="grid gap-px" style={{ background: '#262626' }}>
+                <label className="block text-xs font-medium text-white/50 mb-3 uppercase tracking-wider">Primary goal <span className="text-red-400">*</span></label>
+                <div className="space-y-2">
                   {GOALS.map(goal => (
                     <button key={goal} type="button" onClick={() => update('primaryGoal', goal)}
-                      className="w-full text-left transition-colors" style={{
-                        background: '#000000', padding: '20px 24px',
-                        border: form.primaryGoal === goal ? '1px solid #8b5cf6' : 'none',
-                        color: form.primaryGoal === goal ? '#8b5cf6' : '#999999',
-                        fontSize: '13px', fontWeight: 300
-                      }}>
+                      className={`w-full text-left rounded-xl px-4 py-3 text-sm transition-all ${
+                        form.primaryGoal === goal
+                          ? 'bg-violet-500/10 border border-violet-500/40 text-violet-300'
+                          : 'bg-white/[0.03] border border-white/[0.08] text-white/50 hover:bg-white/[0.05] hover:border-white/[0.12]'
+                      }`}>
                       {goal}
                     </button>
                   ))}
@@ -144,9 +151,13 @@ export default function OnboardingPage() {
                 {fieldErrors.primaryGoal && <p className="mt-1 text-xs text-red-400">{fieldErrors.primaryGoal}</p>}
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setStep(1)} className="btn-ghost flex-1">BACK</button>
-                <button type="submit" disabled={loading} className="btn-primary flex-1">
-                  {loading ? 'SAVING...' : 'FINISH SETUP'}
+                <button type="button" onClick={() => setStep(1)}
+                  className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm font-medium text-white/70 hover:bg-white/10 transition">
+                  Back
+                </button>
+                <button type="submit" disabled={loading}
+                  className="flex-1 btn-premium rounded-xl px-4 py-3.5 text-sm font-semibold text-white disabled:opacity-50">
+                  {loading ? 'Saving...' : 'Finish setup'}
                 </button>
               </div>
             </form>

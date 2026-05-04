@@ -18,7 +18,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="min-h-screen antialiased font-sans bg-canvas text-text-body" style={{ background: '#000000' }}>
+      <body className="min-h-screen antialiased font-sans bg-[#0a0a0f] text-white/70">
+        {/* Subtle aurora blobs */}
+        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-violet-600 opacity-[0.03] blur-3xl" />
+          <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-purple-600 opacity-[0.04] blur-3xl" />
+          <div className="absolute -bottom-40 left-1/3 w-[400px] h-[400px] rounded-full bg-violet-500 opacity-[0.03] blur-3xl" />
+        </div>
         <AuthProvider>
           <Header />
           <div className="relative z-10">{children}</div>

@@ -23,7 +23,7 @@ type Step = "idle" | "initial" | "more" | "guide"
 
 export default function ScriptsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: '#000000' }}><span className="spinner" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin" /></div>}>
       <ScriptsPageInner />
     </Suspense>
   )
@@ -103,40 +103,41 @@ function ScriptsPageInner() {
   }
 
   if (needsOnboarding) return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#000000' }}>
-      <div className="text-center max-w-md" style={{ background: '#141414', border: '1px solid #262626', padding: '48px' }}>
-        <h4 className="mb-3">Complete your profile first</h4>
-        <p className="text-sm text-muted mb-6" style={{ fontWeight: 300 }}>Set your niche so we can generate scripts tailored to your content.</p>
-        <Link href="/onboarding" className="btn-primary">COMPLETE PROFILE</Link>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="glass-strong rounded-2xl p-10 text-center max-w-md">
+        <h2 className="text-lg font-semibold text-white mb-3">Complete your profile first</h2>
+        <p className="text-sm text-white/40 mb-6">Set your niche so we can generate scripts tailored to your content.</p>
+        <Link href="/onboarding" className="btn-premium inline-block rounded-xl px-6 py-3 text-sm font-semibold text-white">Complete profile</Link>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen" style={{ background: '#000000' }}>
-      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px' }}>
+    <div className="min-h-screen">
+      <main className="max-w-4xl mx-auto px-6 py-10 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
-            <p className="section-label mb-2">CONTENT ENGINE</p>
-            <h3>Script generator</h3>
+            <Link href="/dashboard" className="text-xs text-white/30 hover:text-white/50 transition mb-2 inline-block">← Dashboard</Link>
+            <h1 className="text-2xl font-bold text-white">Script generator</h1>
+            <p className="text-sm text-white/40 mt-1">Trend-powered viral scripts for your reels</p>
           </div>
           {step !== "idle" && (
-            <button onClick={handleStartOver} className="btn-ghost">NEW SEARCH</button>
+            <button onClick={handleStartOver} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70 hover:bg-white/10 transition">New search</button>
           )}
         </div>
 
-        {/* Search form — input band */}
-        <div className="mb-10" style={{ background: '#0d0d0d', borderTop: '1px solid #262626', borderBottom: '1px solid #262626', padding: '32px 0' }}>
+        {/* Search form */}
+        <div className="glass-strong rounded-2xl p-6 mb-8">
           <form onSubmit={handleSearch}>
-            <label htmlFor="idea" className="field-label">WHAT REEL DO YOU WANT TO CREATE?</label>
-            <div className="flex gap-4 items-end">
+            <label htmlFor="idea" className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">What reel do you want to create?</label>
+            <div className="flex gap-3 items-end">
               <input id="idea" type="text" value={idea} onChange={(e) => setIdea(e.target.value)}
                 placeholder="e.g. mini vlog for devops engineer, gym transformation reveal..."
-                className="input flex-1" disabled={loading} />
-              <button type="submit" disabled={loading || !idea.trim()} className="btn-primary shrink-0">
-                {loading && step === "idle" ? <span className="spinner" /> : "GENERATE"}
+                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 transition focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30 hover:border-white/20"
+                disabled={loading} />
+              <button type="submit" disabled={loading || !idea.trim()} className="btn-premium rounded-xl px-6 py-3 text-sm font-semibold text-white disabled:opacity-50 shrink-0">
+                {loading && step === "idle" ? <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : "Generate"}
               </button>
             </div>
           </form>
@@ -144,18 +145,18 @@ function ScriptsPageInner() {
 
         {/* Trend Radar */}
         {step === "idle" && trendRadar && trendRadar.clusters.length > 0 && (
-          <div className="mb-10">
-            <p className="section-label mb-4">TRENDING IN YOUR NICHE</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: '#262626' }}>
+          <div className="mb-8">
+            <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-4">Trending in your niche</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {trendRadar.clusters.slice(0, 3).map((cluster) => (
-                <div key={cluster.name} style={{ background: '#141414', padding: '20px' }}>
+                <div key={cluster.name} className="glass rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-white" style={{ fontWeight: 400, textTransform: 'uppercase', letterSpacing: '1px' }}>{cluster.name}</span>
+                    <span className="text-sm font-medium text-white">{cluster.name}</span>
                     <span className="text-xs text-emerald-400">+{cluster.growthPercent}%</span>
                   </div>
-                  {cluster.description && <p className="text-xs text-muted mb-2" style={{ fontWeight: 300 }}>{cluster.description}</p>}
+                  {cluster.description && <p className="text-xs text-white/40 mb-2">{cluster.description}</p>}
                   <div className="flex flex-wrap gap-1">
-                    {cluster.exampleHooks.slice(0, 2).map((h, i) => <span key={i} className="tag text-[10px] truncate max-w-[180px]">{h}</span>)}
+                    {cluster.exampleHooks.slice(0, 2).map((h, i) => <span key={i} className="px-2 py-0.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[10px] text-white/50 truncate max-w-[160px]">{h}</span>)}
                   </div>
                 </div>
               ))}
@@ -163,40 +164,40 @@ function ScriptsPageInner() {
           </div>
         )}
 
-        {error && <div role="alert" className="mb-6 border border-red-500/30 p-4 text-center"><p className="text-sm text-red-400">{error}</p></div>}
-        {loading && <div className="p-8 mb-6 text-center"><span className="spinner" /><p className="text-sm text-muted mt-3">Generating...</p></div>}
+        {error && <div role="alert" className="mb-6 glass rounded-2xl border-red-500/20 bg-red-500/5 p-4 text-center"><p className="text-sm text-red-300">{error}</p></div>}
+        {loading && <div className="glass rounded-2xl p-8 mb-6 text-center"><span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin inline-block" /><p className="text-sm text-white/40 mt-3">Generating...</p></div>}
 
         {/* STEP 1: Single script */}
         {!loading && initialScript && step === "initial" && (
-          <div className="space-y-6">
-            <ScriptCard script={initialScript} badge="YOUR SCRIPT" onViewGuide={() => handleViewFullGuide(initialScript)} />
-            <button onClick={handleGenerateMore} disabled={loading} className="btn-ghost w-full">GENERATE 3 MORE SCRIPTS</button>
+          <div className="space-y-4">
+            <ScriptCard script={initialScript} badge="Your script" onViewGuide={() => handleViewFullGuide(initialScript)} />
+            <button onClick={handleGenerateMore} disabled={loading} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/10 hover:border-white/20 transition">Generate 3 more scripts</button>
           </div>
         )}
 
         {/* STEP 2: Multiple scripts */}
         {!loading && moreScripts.length > 0 && step === "more" && (
-          <div className="space-y-6">
-            <p className="section-label">PICK A SCRIPT FOR THE FULL GUIDE</p>
+          <div className="space-y-4">
+            <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Pick a script for the full guide</p>
             {moreScripts.map((script, idx) => {
               const isLocked = idx === 1 && streakDays < 3 ? "streak" : idx === 2 ? "premium" : null
               return (
                 <div key={script.id} className="relative">
                   {isLocked ? (
-                    <div className="relative overflow-hidden" style={{ background: '#141414', border: '1px solid #262626', padding: '24px' }}>
-                      <div className="absolute inset-0 z-10 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
+                    <div className="relative overflow-hidden glass rounded-2xl p-6">
+                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-[#0a0a0f]/80 backdrop-blur-sm">
                         <div className="text-center">
-                          <p className="caption-upper text-white mb-1">{isLocked === "streak" ? `UNLOCK AT DAY 3 (${streakDays}/3)` : "PREMIUM ONLY"}</p>
-                          <p className="text-xs text-muted" style={{ fontWeight: 300 }}>{isLocked === "streak" ? "Keep posting daily" : "Upgrade to access"}</p>
+                          <p className="text-sm font-medium text-white mb-1">{isLocked === "streak" ? `Unlock at Day 3 (${streakDays}/3)` : "Premium only"}</p>
+                          <p className="text-xs text-white/40">{isLocked === "streak" ? "Keep posting daily" : "Upgrade to access"}</p>
                         </div>
                       </div>
                       <div className="opacity-20 pointer-events-none">
-                        <h5 className="mb-1">{script.hook}</h5>
-                        <p className="text-sm text-muted">{script.concept}</p>
+                        <h3 className="text-sm font-medium text-white mb-1">{script.hook}</h3>
+                        <p className="text-xs text-white/40">{script.concept}</p>
                       </div>
                     </div>
                   ) : (
-                    <ScriptCard script={script} badge={`SCRIPT ${idx + 1}`} onViewGuide={() => handleViewFullGuide(script)} />
+                    <ScriptCard script={script} badge={`Script ${idx + 1}`} onViewGuide={() => handleViewFullGuide(script)} />
                   )}
                 </div>
               )
@@ -211,9 +212,10 @@ function ScriptsPageInner() {
 
         {/* Empty state */}
         {step === "idle" && !loading && (
-          <div className="text-center" style={{ padding: '64px 0' }}>
-            <h5 className="mb-3">Don{"\u2019"}t guess your next reel</h5>
-            <p className="text-sm text-muted max-w-md mx-auto" style={{ fontWeight: 300 }}>Type your idea above. We'll give you a script idea first, then a full shooting guide when you're ready.</p>
+          <div className="text-center py-16">
+            <p className="text-4xl mb-4">✍️</p>
+            <h2 className="text-lg font-semibold text-white mb-2">Don&apos;t guess your next reel</h2>
+            <p className="text-sm text-white/40 max-w-md mx-auto">Type your idea above. We'll give you a script idea first, then a full shooting guide when you're ready.</p>
           </div>
         )}
       </main>
@@ -224,102 +226,102 @@ function ScriptsPageInner() {
 function ScriptCard({ script, badge, onViewGuide }: { script: DeepScript; badge: string; onViewGuide: () => void }) {
   const difficulty = getDifficulty(script)
   return (
-    <div style={{ background: '#141414', border: '1px solid #262626', padding: '32px' }}>
-      <div className="flex items-center gap-2 flex-wrap mb-4">
-        <span className="tag-accent">{badge}</span>
-        {script.trendBased && <span className="tag">TREND-BASED</span>}
+    <div className="glass rounded-2xl p-6">
+      <div className="flex items-center gap-2 flex-wrap mb-3">
+        <span className="px-2.5 py-0.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-[11px] text-violet-300 font-medium">{badge}</span>
+        {script.trendBased && <span className="px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[11px] text-white/50">Trend-based</span>}
       </div>
-      <h5 className="mb-2">{script.hook}</h5>
-      <p className="text-sm text-body mb-4" style={{ fontWeight: 300 }}>{script.concept}</p>
-      <div className="flex items-center gap-3 mb-4">
-        <span className="tag">{script.duration || "20-25s"}</span>
-        <span className="tag">{difficulty}</span>
+      <h3 className="text-base font-semibold text-white mb-1">{script.hook}</h3>
+      <p className="text-sm text-white/50 mb-4">{script.concept}</p>
+      <div className="flex items-center gap-2 mb-4">
+        <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-white/50">{script.duration || "20-25s"}</span>
+        <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-white/50">{difficulty}</span>
       </div>
-      {script.whyViral && <p className="text-xs text-emerald-400 mb-4" style={{ fontWeight: 300 }}>{script.whyViral}</p>}
-      <button onClick={onViewGuide} className="btn-primary">VIEW FULL GUIDE</button>
+      {script.whyViral && <p className="text-xs text-emerald-400 mb-4">{script.whyViral}</p>}
+      <button onClick={onViewGuide} className="btn-premium rounded-xl px-5 py-2.5 text-sm font-semibold text-white">View full guide</button>
     </div>
   )
 }
 
 function FullGuideView({ guide, openSections, onToggleSection, onCopy, copied }: { guide: ExecutionGuide; openSections: Record<string, boolean>; onToggleSection: (key: string) => void; onCopy: () => void; copied: boolean }) {
   return (
-    <div className="space-y-6">
-      <div className="streak-card">
+    <div className="space-y-4">
+      <div className="glass-strong rounded-2xl p-6 border-l-2 border-violet-500/50">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <span className="tag-accent mb-3 inline-block">FULL SHOOTING GUIDE</span>
-            <h5>{guide.title || guide.concept}</h5>
-            <p className="text-sm text-body mt-2" style={{ fontWeight: 300 }}>{guide.hook}</p>
+            <span className="px-2.5 py-0.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-[11px] text-violet-300 font-medium mb-3 inline-block">Full shooting guide</span>
+            <h2 className="text-lg font-semibold text-white">{guide.title || guide.concept}</h2>
+            <p className="text-sm text-white/50 mt-1">{guide.hook}</p>
           </div>
-          <button onClick={onCopy} className="btn-ghost text-xs">{copied ? "COPIED" : "COPY ALL"}</button>
+          <button onClick={onCopy} className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 hover:bg-white/10 transition">{copied ? "Copied!" : "Copy all"}</button>
         </div>
         <div className="flex flex-wrap gap-2">
-          <span className="tag">{guide.duration}</span>
-          <span className="tag-accent">{guide.voiceType.split("\u2014")[0].split("--")[0].trim()}</span>
+          <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-white/50">{guide.duration}</span>
+          <span className="px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs text-violet-300">{guide.voiceType.split("\u2014")[0].split("--")[0].trim()}</span>
         </div>
       </div>
 
       {guide.whyViral && (
-        <div style={{ borderLeft: '2px solid #34d399', paddingLeft: '16px' }}>
-          <p className="caption-upper text-emerald-400 mb-1">VIRAL POTENTIAL</p>
-          <p className="text-sm text-emerald-300" style={{ fontWeight: 300 }}>{guide.whyViral}</p>
+        <div className="glass rounded-2xl p-4 border-l-2 border-emerald-500/30">
+          <p className="text-xs font-medium text-emerald-400 mb-1">Viral potential</p>
+          <p className="text-sm text-emerald-300/80">{guide.whyViral}</p>
         </div>
       )}
 
-      <CollapsibleSection label="SCENE BREAKDOWN" count={guide.scenes.length} open={openSections.scenes} onToggle={() => onToggleSection("scenes")}>
-        <div className="space-y-4">
+      <CollapsibleSection label="Scene breakdown" count={guide.scenes.length} open={openSections.scenes} onToggle={() => onToggleSection("scenes")}>
+        <div className="space-y-3">
           {guide.scenes.map((scene) => (
-            <div key={scene.sceneNumber} style={{ padding: '16px 0', borderBottom: '1px solid #262626' }}>
+            <div key={scene.sceneNumber} className="glass rounded-xl p-4">
               <div className="flex items-center gap-3 mb-2">
-                <span className="caption-upper text-accent">{String(scene.sceneNumber).padStart(2, '0')}</span>
-                <h6>{scene.title}</h6>
-                <span className="caption-upper">{scene.timeRange}</span>
+                <span className="text-xs font-medium text-violet-400">{String(scene.sceneNumber).padStart(2, '0')}</span>
+                <span className="text-sm font-medium text-white">{scene.title}</span>
+                <span className="text-xs text-white/30 ml-auto">{scene.timeRange}</span>
               </div>
-              <p className="text-sm text-body mb-1" style={{ fontWeight: 300 }}>{scene.action}</p>
-              {scene.dialogue && <p className="text-sm text-amber-400 italic" style={{ fontWeight: 300 }}>&ldquo;{scene.dialogue}&rdquo;</p>}
-              {scene.textOverlay && <p className="text-xs text-accent mt-1" style={{ fontWeight: 300 }}>Text: {scene.textOverlay}</p>}
+              <p className="text-sm text-white/50 mb-1">{scene.action}</p>
+              {scene.dialogue && <p className="text-sm text-amber-400/80 italic">&ldquo;{scene.dialogue}&rdquo;</p>}
+              {scene.textOverlay && <p className="text-xs text-violet-300 mt-1">Text: {scene.textOverlay}</p>}
             </div>
           ))}
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection label="EDITING TIPS" open={openSections.editing} onToggle={() => onToggleSection("editing")}>
+      <CollapsibleSection label="Editing tips" open={openSections.editing} onToggle={() => onToggleSection("editing")}>
         <div className="space-y-3">
-          {guide.subtitlesSuggestion && <div><p className="caption-upper mb-1">SUBTITLES</p><p className="text-sm text-body" style={{ fontWeight: 300 }}>{guide.subtitlesSuggestion}</p></div>}
-          {guide.editingNotes && <div><p className="caption-upper mb-1">NOTES</p><p className="text-sm text-body" style={{ fontWeight: 300 }}>{guide.editingNotes}</p></div>}
+          {guide.subtitlesSuggestion && <div><p className="text-xs font-medium text-white/50 mb-1">Subtitles</p><p className="text-sm text-white/60">{guide.subtitlesSuggestion}</p></div>}
+          {guide.editingNotes && <div><p className="text-xs font-medium text-white/50 mb-1">Notes</p><p className="text-sm text-white/60">{guide.editingNotes}</p></div>}
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection label="TRENDING AUDIO" count={guide.trendingAudio.length} open={openSections.audio} onToggle={() => onToggleSection("audio")}>
+      <CollapsibleSection label="Trending audio" count={guide.trendingAudio.length} open={openSections.audio} onToggle={() => onToggleSection("audio")}>
         <div className="space-y-2">
-          {guide.trendingAudio.map((audio, i) => <p key={i} className="text-sm text-body" style={{ fontWeight: 300, borderBottom: '1px solid #262626', paddingBottom: '8px' }}>{audio}</p>)}
+          {guide.trendingAudio.map((audio, i) => <p key={i} className="text-sm text-white/60 py-2 border-b border-white/[0.06] last:border-0">{audio}</p>)}
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection label="PRO TIPS" count={guide.proTips.length} open={openSections.tips} onToggle={() => onToggleSection("tips")}>
+      <CollapsibleSection label="Pro tips" count={guide.proTips.length} open={openSections.tips} onToggle={() => onToggleSection("tips")}>
         <div className="space-y-2">
-          {guide.proTips.map((tip, i) => <p key={i} className="text-sm text-body" style={{ fontWeight: 300, borderBottom: '1px solid #262626', paddingBottom: '8px' }}>{tip}</p>)}
+          {guide.proTips.map((tip, i) => <p key={i} className="text-sm text-white/60 py-2 border-b border-white/[0.06] last:border-0">{tip}</p>)}
         </div>
       </CollapsibleSection>
 
-      <div style={{ borderTop: '1px solid #262626', paddingTop: '24px' }}>
-        <p className="caption-upper mb-2">WHY THIS WORKS</p>
+      <div className="glass rounded-2xl p-5">
+        <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-3">Why this works</p>
         <div className="flex flex-wrap gap-2">
-          {guide.whyItWorks.map((reason, i) => <span key={i} className="tag text-emerald-400">{reason}</span>)}
+          {guide.whyItWorks.map((reason, i) => <span key={i} className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">{reason}</span>)}
         </div>
       </div>
 
-      <div style={{ borderTop: '1px solid #262626', paddingTop: '24px' }}>
-        <p className="caption-upper mb-2">CAPTION</p>
-        <p className="text-sm text-body mb-4" style={{ fontWeight: 300 }}>{guide.caption}</p>
+      <div className="glass rounded-2xl p-5">
+        <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Caption</p>
+        <p className="text-sm text-white/60 mb-3">{guide.caption}</p>
         <div className="flex flex-wrap gap-1.5">
-          {guide.hashtags.map(tag => <span key={tag} className="tag">#{tag}</span>)}
+          {guide.hashtags.map(tag => <span key={tag} className="px-2 py-0.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-white/40">#{tag}</span>)}
         </div>
       </div>
 
       {guide.callToAction && (
-        <div style={{ borderTop: '1px solid #262626', paddingTop: '24px' }}>
-          <p className="text-sm text-accent" style={{ fontWeight: 400 }}>{guide.callToAction}</p>
+        <div className="glass rounded-2xl p-5 border-l-2 border-violet-500/30">
+          <p className="text-sm text-violet-300">{guide.callToAction}</p>
         </div>
       )}
     </div>
@@ -328,15 +330,15 @@ function FullGuideView({ guide, openSections, onToggleSection, onCopy, copied }:
 
 function CollapsibleSection({ label, count, open, onToggle, children }: { label: string; count?: number; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <div style={{ borderTop: '1px solid #262626' }}>
-      <button onClick={onToggle} className="w-full flex items-center justify-between py-5 text-left">
+    <div className="glass rounded-2xl overflow-hidden">
+      <button onClick={onToggle} className="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition">
         <div className="flex items-center gap-3">
-          <span className="caption-upper">{label}</span>
-          {count !== undefined && <span className="tag text-[10px]">{count}</span>}
+          <span className="text-sm font-medium text-white/70">{label}</span>
+          {count !== undefined && <span className="px-2 py-0.5 rounded-lg bg-white/[0.06] text-[10px] text-white/40">{count}</span>}
         </div>
-        <span className={`text-xs text-muted transition-transform duration-200 ${open ? "rotate-90" : ""}`}>{"\u25B6"}</span>
+        <span className={`text-xs text-white/30 transition-transform duration-200 ${open ? "rotate-90" : ""}`}>▶</span>
       </button>
-      {open && <div className="pb-6">{children}</div>}
+      {open && <div className="px-5 pb-5">{children}</div>}
     </div>
   )
 }

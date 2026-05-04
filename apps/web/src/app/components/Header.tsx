@@ -34,6 +34,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [streak, setStreak] = useState<StreakData>({ current: 0, highest: 0 })
+  const [scrolled, setScrolled] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const fetchStreak = useCallback(() => {
@@ -52,6 +53,12 @@ export default function Header() {
   }, [fetchStreak])
 
   useEffect(() => {
+    function handleScroll() { setScrolled(window.scrollY > 10) }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
     if (!profileOpen) return
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setProfileOpen(false)
@@ -63,19 +70,26 @@ export default function Header() {
   if (pathname === '/login' || pathname === '/register' || pathname === '/onboarding' || pathname === '/' || pathname === '/auth/callback') return null
 
   return (
-    <header className="sticky top-0 z-50" style={{ height: '64px', background: '#000000', borderBottom: '1px solid #262626' }}>
-      <div className="editorial-container flex items-center justify-between h-full">
-        {/* Wordmark */}
-        <div className="flex items-center gap-10">
-          <Link href="/dashboard" className="wordmark">
-            VIRALY
+    <header className={`sticky top-0 z-50 h-16 transition-all duration-300 ${scrolled ? 'bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/[0.06]' : 'bg-transparent border-b border-white/[0.04]'}`}>
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-full">
+        {/* Logo */}
+        <div className="flex items-center gap-8">
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 text-xs font-bold text-white shadow-lg shadow-violet-500/20 transition group-hover:shadow-violet-500/30 group-hover:scale-105">
+              V
+            </div>
+            <span className="text-lg font-semibold tracking-tight text-white">Viraly</span>
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center" style={{ gap: '40px' }}>
+          <nav className="hidden lg:flex items-center gap-1">
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href}
-                className={`nav-item ${pathname === item.href ? 'active' : ''}`}>
+                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  pathname === item.href
+                    ? 'text-white bg-white/[0.06]'
+                    : 'text-white/40 hover:text-white/70 hover:bg-white/[0.03]'
+                }`}>
                 {item.label}
               </Link>
             ))}
@@ -83,73 +97,72 @@ export default function Header() {
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
-          {/* Streak tag */}
+        <div className="flex items-center gap-3">
+          {/* Streak badge */}
           {streak.current > 0 && (
-            <span className="tag-accent">
-              {streak.current}D
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs text-violet-300 font-medium">
+              🔥 {streak.current}
             </span>
           )}
 
           {/* Profile */}
           <div className="relative" ref={dropdownRef}>
             <button onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center justify-center w-9 h-9 rounded-full border border-hairline text-xs text-white transition-colors hover:border-white"
-              style={{ fontWeight: 400, letterSpacing: '1px' }}>
+              className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.05] border border-white/[0.08] text-xs text-white font-medium transition-all hover:bg-white/[0.08] hover:border-white/[0.12]">
               {getInitials(creator)}
             </button>
 
             {/* Dropdown */}
             {profileOpen && (
-              <div className="absolute right-0 top-full mt-2 z-50 w-64" style={{ background: '#141414', border: '1px solid #262626' }}>
-                <div className="p-4 pb-3">
+              <div className="absolute right-0 top-full mt-2 z-50 w-72 glass-strong rounded-2xl overflow-hidden animate-fade-in">
+                <div className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-hairline text-xs text-white shrink-0" style={{ fontWeight: 400 }}>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 text-xs font-bold text-white shrink-0">
                       {getInitials(creator)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm text-white truncate" style={{ fontWeight: 400 }}>{creator?.displayName || 'Creator'}</p>
-                      <p className="text-xs text-muted truncate">{creator?.email}</p>
+                      <p className="text-sm font-medium text-white truncate">{creator?.displayName || 'Creator'}</p>
+                      <p className="text-xs text-white/40 truncate">{creator?.email}</p>
                     </div>
                   </div>
                 </div>
                 <div className="px-4 pb-3">
                   <div className="flex gap-3">
-                    <div className="flex-1 text-center" style={{ borderTop: '1px solid #262626', paddingTop: '12px' }}>
-                      <p className="text-lg text-accent" style={{ fontWeight: 400 }}>{streak.current}</p>
-                      <p className="spec-label">CURRENT</p>
+                    <div className="flex-1 text-center glass rounded-xl p-3">
+                      <p className="text-lg font-semibold text-violet-400">{streak.current}</p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Current</p>
                     </div>
-                    <div className="flex-1 text-center" style={{ borderTop: '1px solid #262626', paddingTop: '12px' }}>
-                      <p className="text-lg text-white" style={{ fontWeight: 400 }}>{streak.highest}</p>
-                      <p className="spec-label">BEST</p>
+                    <div className="flex-1 text-center glass rounded-xl p-3">
+                      <p className="text-lg font-semibold text-white">{streak.highest}</p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Best</p>
                     </div>
                   </div>
                 </div>
-                <div style={{ height: '1px', background: '#262626', margin: '0 16px' }} />
+                <div className="h-px bg-white/[0.06] mx-4" />
                 <div className="px-4 py-3 space-y-2">
                   {creator?.primaryNiche && (
                     <div className="flex items-center justify-between">
-                      <span className="caption-upper">Niche</span>
-                      <span className="tag-accent text-xs capitalize">{creator.primaryNiche}</span>
+                      <span className="text-xs text-white/40">Niche</span>
+                      <span className="text-xs text-violet-300 capitalize">{creator.primaryNiche}</span>
                     </div>
                   )}
                   {creator?.instagramHandle && (
                     <div className="flex items-center justify-between">
-                      <span className="caption-upper">Instagram</span>
+                      <span className="text-xs text-white/40">Instagram</span>
                       <a href={`https://instagram.com/${creator.instagramHandle}`} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-accent hover:text-white transition-colors">@{creator.instagramHandle}</a>
+                        className="text-xs text-violet-400 hover:text-violet-300 transition">@{creator.instagramHandle}</a>
                     </div>
                   )}
                 </div>
-                <div style={{ height: '1px', background: '#262626', margin: '0 16px' }} />
-                <div className="p-3">
+                <div className="h-px bg-white/[0.06] mx-4" />
+                <div className="p-2">
                   <Link href="/onboarding" onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-xs text-muted hover:text-white transition-colors" style={{ letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 400 }}>
-                    Edit Profile
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.04] transition">
+                    Edit profile
                   </Link>
                   <button onClick={() => { setProfileOpen(false); logout() }}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-xs text-red-400 hover:text-red-300 transition-colors" style={{ letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 400 }}>
-                    Logout
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-red-400 hover:text-red-300 hover:bg-red-500/[0.05] transition">
+                    Log out
                   </button>
                 </div>
               </div>
@@ -157,7 +170,7 @@ export default function Header() {
           </div>
 
           {/* Mobile menu toggle */}
-          <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden btn-icon" aria-label="Toggle menu">
+          <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/60 hover:text-white transition" aria-label="Toggle menu">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {menuOpen
                 ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
@@ -169,13 +182,13 @@ export default function Header() {
 
       {/* Mobile nav */}
       {menuOpen && (
-        <nav className="lg:hidden px-4 py-4" style={{ background: '#000000', borderTop: '1px solid #262626' }}>
-          <div className="grid grid-cols-3 gap-px" style={{ background: '#262626' }}>
+        <nav className="lg:hidden glass-strong border-t border-white/[0.06] animate-fade-in">
+          <div className="max-w-7xl mx-auto px-6 py-4 grid grid-cols-3 gap-2">
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
-                className={`flex items-center justify-center py-4 text-center transition-colors ${
-                  pathname === item.href ? 'text-white' : 'text-muted hover:text-white'
-                }`} style={{ background: '#000000', fontSize: '11px', fontWeight: 400, letterSpacing: '2px', textTransform: 'uppercase' as const }}>
+                className={`flex items-center justify-center py-3 rounded-xl text-sm transition-colors ${
+                  pathname === item.href ? 'text-white bg-white/[0.06]' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.03]'
+                }`}>
                 {item.label}
               </Link>
             ))}

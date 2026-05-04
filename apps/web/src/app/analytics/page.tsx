@@ -37,77 +37,80 @@ export default function AnalyticsPage() {
     } catch {} finally { setExporting(false) }
   }
 
-  function growthColor(v: number) { return v > 0 ? '#34d399' : v < 0 ? '#ef4444' : '#666666' }
+  function growthColor(v: number) { return v > 0 ? 'text-emerald-400' : v < 0 ? 'text-red-400' : 'text-white/40' }
   function growthText(v: number) { return v > 0 ? `+${v}` : `${v}` }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ background: '#000000' }}><span className="spinner" /></div>
-  if (error) return <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#000000' }}><div className="border border-red-500/30 p-6 text-center max-w-md"><p className="text-sm text-red-400">{error}</p></div></div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><span className="h-5 w-5 rounded-full border-2 border-white/20 border-t-violet-500 animate-spin" /></div>
+  if (error) return <div className="min-h-screen flex items-center justify-center px-4"><div className="glass rounded-2xl border-red-500/20 bg-red-500/5 p-6 text-center max-w-md"><p className="text-sm text-red-300">{error}</p></div></div>
 
   return (
-    <div className="min-h-screen" style={{ background: '#000000' }}>
-      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px' }}>
-        <div className="flex items-center justify-between mb-10">
+    <div className="min-h-screen">
+      <main className="max-w-5xl mx-auto px-6 py-10 animate-fade-in">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
-            <p className="section-label mb-2">GROWTH METRICS</p>
-            <h3>Analytics</h3>
+            <Link href="/dashboard" className="text-xs text-white/30 hover:text-white/50 transition mb-2 inline-block">← Dashboard</Link>
+            <h1 className="text-2xl font-bold text-white">Analytics</h1>
+            <p className="text-sm text-white/40 mt-1">Your growth metrics at a glance</p>
           </div>
-          <button type="button" onClick={handleExport} disabled={exporting} className="btn-ghost">
-            {exporting ? 'EXPORTING...' : 'EXPORT CSV'}
+          <button type="button" onClick={handleExport} disabled={exporting}
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 transition disabled:opacity-50">
+            {exporting ? 'Exporting...' : 'Export CSV'}
           </button>
         </div>
 
         {/* Stats grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px mb-10" style={{ background: '#262626' }}>
-          <div style={{ background: '#141414', padding: '24px' }}>
-            <p className="spec-value" style={{ fontSize: '36px' }}>{data?.followerCount?.toLocaleString() ?? '0'}</p>
-            <p className="spec-label">FOLLOWERS</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="glass rounded-2xl p-5">
+            <p className="text-2xl font-bold text-white">{data?.followerCount?.toLocaleString() ?? '0'}</p>
+            <p className="text-xs text-white/40 mt-1">Followers</p>
           </div>
-          <div style={{ background: '#141414', padding: '24px' }}>
-            <p className="spec-value" style={{ fontSize: '36px', color: growthColor(data?.followerGrowth7d ?? 0) }}>{growthText(data?.followerGrowth7d ?? 0)}</p>
-            <p className="spec-label">GROWTH (7D)</p>
+          <div className="glass rounded-2xl p-5">
+            <p className={`text-2xl font-bold ${growthColor(data?.followerGrowth7d ?? 0)}`}>{growthText(data?.followerGrowth7d ?? 0)}</p>
+            <p className="text-xs text-white/40 mt-1">Growth (7d)</p>
           </div>
-          <div style={{ background: '#141414', padding: '24px' }}>
-            <p className="spec-value" style={{ fontSize: '36px', color: growthColor(data?.followerGrowth30d ?? 0) }}>{growthText(data?.followerGrowth30d ?? 0)}</p>
-            <p className="spec-label">GROWTH (30D)</p>
+          <div className="glass rounded-2xl p-5">
+            <p className={`text-2xl font-bold ${growthColor(data?.followerGrowth30d ?? 0)}`}>{growthText(data?.followerGrowth30d ?? 0)}</p>
+            <p className="text-xs text-white/40 mt-1">Growth (30d)</p>
           </div>
-          <div style={{ background: '#141414', padding: '24px' }}>
-            <p className="spec-value" style={{ fontSize: '36px' }}>{data?.postingConsistency30d ?? 0}%</p>
-            <p className="spec-label">CONSISTENCY</p>
+          <div className="glass rounded-2xl p-5">
+            <p className="text-2xl font-bold text-white">{data?.postingConsistency30d ?? 0}%</p>
+            <p className="text-xs text-white/40 mt-1">Consistency</p>
           </div>
         </div>
 
         {/* Streak */}
-        <div className="grid grid-cols-2 gap-px mb-10" style={{ background: '#262626' }}>
-          <div style={{ background: '#141414', padding: '24px' }}>
-            <p className="spec-value text-accent" style={{ fontSize: '36px' }}>{data?.streak.current ?? 0}</p>
-            <p className="spec-label">CURRENT STREAK</p>
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="glass rounded-2xl p-5">
+            <p className="text-3xl font-bold text-violet-400">{data?.streak.current ?? 0}</p>
+            <p className="text-xs text-white/40 mt-1">Current streak</p>
           </div>
-          <div style={{ background: '#141414', padding: '24px' }}>
-            <p className="spec-value" style={{ fontSize: '36px' }}>{data?.streak.highest ?? 0}</p>
-            <p className="spec-label">BEST STREAK</p>
+          <div className="glass rounded-2xl p-5">
+            <p className="text-3xl font-bold text-white">{data?.streak.highest ?? 0}</p>
+            <p className="text-xs text-white/40 mt-1">Best streak</p>
           </div>
         </div>
 
         {/* Reels */}
-        <p className="caption-upper mb-4">SUBMITTED REELS</p>
-        {!data?.reels.length ? (
-          <p className="text-sm text-muted text-center py-8" style={{ fontWeight: 300 }}>No reels submitted yet.</p>
-        ) : (
-          <div>
-            {data.reels.map((r) => (
-              <div key={r.id} className="flex items-center justify-between" style={{ borderBottom: '1px solid #262626', padding: '16px 0' }}>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-white truncate" style={{ fontWeight: 300 }}>{r.url}</p>
-                  <p className="text-xs text-muted mt-0.5">{new Date(r.submittedAt).toLocaleString()}</p>
+        <div className="glass rounded-2xl p-6">
+          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-4">Submitted reels</p>
+          {!data?.reels.length ? (
+            <p className="text-sm text-white/40 text-center py-8">No reels submitted yet.</p>
+          ) : (
+            <div>
+              {data.reels.map((r) => (
+                <div key={r.id} className="flex items-center justify-between py-3 border-b border-white/[0.06] last:border-0">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-white truncate">{r.url}</p>
+                    <p className="text-xs text-white/30 mt-0.5">{new Date(r.submittedAt).toLocaleString()}</p>
+                  </div>
+                  {r.viralityScore !== null && (
+                    <span className={`text-sm font-medium ${r.viralityScore >= 70 ? 'text-emerald-400' : r.viralityScore >= 40 ? 'text-amber-400' : 'text-red-400'}`}>{r.viralityScore}/100</span>
+                  )}
                 </div>
-                {r.viralityScore !== null && (
-                  <span className="text-sm" style={{ fontWeight: 400, color: r.viralityScore >= 70 ? '#34d399' : r.viralityScore >= 40 ? '#f59e0b' : '#ef4444' }}>{r.viralityScore}/100</span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   )
