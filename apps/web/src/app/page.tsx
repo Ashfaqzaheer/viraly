@@ -4,146 +4,109 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/auth'
 
 const features = [
-  { name: 'Dashboard', href: '/dashboard', icon: '📊', desc: 'Your growth command center' },
-  { name: 'Daily Scripts', href: '/scripts', icon: '📝', desc: 'Trend-powered viral scripts' },
-  { name: 'Reel Feedback', href: '/reels', icon: '🎬', desc: 'Smart reel analysis' },
-  { name: 'Virality Score', href: '/virality', icon: '🚀', desc: 'Predict before you post' },
-  { name: 'Trend Radar', href: '/trends', icon: '📡', desc: 'What\'s trending right now' },
-  { name: 'Hook Library', href: '/hooks', icon: '🪝', desc: 'Proven viral openers' },
-  { name: 'Streak', href: '/streak', icon: '🔥', desc: 'Stay consistent, stay growing' },
-  { name: 'Analytics', href: '/analytics', icon: '📈', desc: 'Deep growth insights' },
-  { name: 'Monetization', href: '/monetization', icon: '💰', desc: 'Turn followers into income' },
+  { name: 'Dashboard', href: '/dashboard', desc: 'Your growth command center' },
+  { name: 'Daily Scripts', href: '/scripts', desc: 'Trend-powered viral scripts' },
+  { name: 'Reel Feedback', href: '/reels', desc: 'Smart reel analysis' },
+  { name: 'Virality Score', href: '/virality', desc: 'Predict before you post' },
+  { name: 'Trend Radar', href: '/trends', desc: 'What\'s trending right now' },
+  { name: 'Hook Library', href: '/hooks', desc: 'Proven viral openers' },
+  { name: 'Streak', href: '/streak', desc: 'Stay consistent, stay growing' },
+  { name: 'Analytics', href: '/analytics', desc: 'Deep growth insights' },
+  { name: 'Monetization', href: '/monetization', desc: 'Turn followers into income' },
 ]
 
 const stats = [
-  { value: '10K+', label: 'Creators' },
-  { value: '3M+', label: 'Scripts Generated' },
-  { value: '89%', label: 'Avg Growth Rate' },
-  { value: '4.9★', label: 'Rating' },
+  { value: '10K+', label: 'CREATORS' },
+  { value: '3M+', label: 'SCRIPTS' },
+  { value: '89%', label: 'GROWTH RATE' },
+  { value: '4.9', label: 'RATING' },
 ]
 
 export default function Home() {
   const { accessToken, creator, logout } = useAuth()
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen" style={{ background: '#000000' }}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-black border-b border-hairline" style={{ height: '64px' }}>
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 h-full">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-display-sm text-white font-bold uppercase">VIRALY</span>
-          </Link>
-          <nav className="hidden items-center gap-8 md:flex">
-            <Link href="/dashboard" className="text-sm font-bold uppercase tracking-[1.5px] text-text-muted transition-colors hover:text-white">Dashboard</Link>
-            <Link href="/scripts" className="text-sm font-bold uppercase tracking-[1.5px] text-text-muted transition-colors hover:text-white">Scripts</Link>
-            <Link href="/trends" className="text-sm font-bold uppercase tracking-[1.5px] text-text-muted transition-colors hover:text-white">Trends</Link>
-            <Link href="/analytics" className="text-sm font-bold uppercase tracking-[1.5px] text-text-muted transition-colors hover:text-white">Analytics</Link>
+      <header className="sticky top-0 z-50" style={{ height: '64px', background: '#000000', borderBottom: '1px solid #262626' }}>
+        <div className="editorial-container flex items-center justify-between h-full">
+          <Link href="/" className="wordmark">VIRALY</Link>
+          <nav className="hidden md:flex items-center" style={{ gap: '40px' }}>
+            <Link href="/dashboard" className="nav-item">DASHBOARD</Link>
+            <Link href="/scripts" className="nav-item">SCRIPTS</Link>
+            <Link href="/trends" className="nav-item">TRENDS</Link>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {accessToken ? (
               <>
-                <span className="hidden text-sm text-text-muted sm:block">{creator?.email}</span>
-                <button
-                  onClick={logout}
-                  className="btn-secondary h-10 px-4 text-xs"
-                >
-                  LOGOUT
-                </button>
+                <span className="text-sm text-muted hidden sm:block" style={{ fontWeight: 300 }}>{creator?.email}</span>
+                <button onClick={logout} className="btn-ghost">LOGOUT</button>
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-bold uppercase tracking-[1.5px] text-text-muted hover:text-white transition-colors px-4 py-2">
-                  Sign In
-                </Link>
-                <Link href="/register" className="btn-primary h-10 px-5 text-xs">
-                  GET STARTED
-                </Link>
+                <Link href="/login" className="nav-item">SIGN IN</Link>
+                <Link href="/register" className="btn-primary">GET STARTED</Link>
               </>
             )}
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="mx-auto max-w-7xl px-6 pb-16 pt-24 text-center">
-        <div>
-          <div className="mb-6 inline-flex items-center gap-2 border border-hairline bg-surface-soft px-4 py-1.5 text-sm text-text-muted">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Trusted by 10,000+ creators worldwide
-          </div>
-          <h1 className="mx-auto max-w-4xl text-display-xl uppercase font-bold leading-[1.0] tracking-tight">
-            Don&apos;t Guess Your Next Reel.{' '}
-            <span className="text-accent">We Decide It.</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-body-md text-text-muted">
-            Trend-powered scripts, AI reel feedback, virality predictions, and growth analytics — your complete creator operating system.
-          </p>
-        </div>
+      {/* Hero */}
+      <section className="editorial-container text-center" style={{ paddingTop: '120px', paddingBottom: '120px' }}>
+        <p className="caption-upper mb-6">TRUSTED BY 10,000+ CREATORS</p>
+        <h1 className="mx-auto max-w-4xl">
+          Don&apos;t guess your next reel.{' '}
+          <span className="text-accent">We decide it.</span>
+        </h1>
+        <p className="mx-auto mt-6 max-w-2xl text-sm text-muted" style={{ fontWeight: 300 }}>
+          Trend-powered scripts, AI reel feedback, virality predictions, and growth analytics — your complete creator operating system.
+        </p>
 
         {!accessToken && (
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/register"
-              className="btn-primary px-10 py-4 text-base h-auto"
-            >
-              START GROWING — IT&apos;S FREE
+            <Link href="/register" className="btn-primary px-10" style={{ height: '52px' }}>
+              START GROWING — FREE
             </Link>
-            <Link
-              href="/login"
-              className="btn-secondary px-8 py-4 text-base h-auto gap-2"
-            >
+            <Link href="/login" className="btn-ghost px-8" style={{ height: '52px' }}>
               SIGN IN
-              <span>{"\u2192"}</span>
             </Link>
           </div>
         )}
 
-        {/* Stats bar */}
-        <div className="mx-auto mt-20 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
+        {/* Stats */}
+        <div className="mx-auto mt-20 grid max-w-3xl grid-cols-2 sm:grid-cols-4 gap-px" style={{ background: '#262626' }}>
           {stats.map((s) => (
-            <div key={s.label} className="spec-cell text-center">
-              <p className="spec-value">{s.value}</p>
+            <div key={s.label} style={{ background: '#000000', padding: '24px' }} className="text-center">
+              <p className="spec-value" style={{ fontSize: '36px' }}>{s.value}</p>
               <p className="spec-label">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Feature Grid */}
-      <section className="mx-auto max-w-7xl px-6 pb-32">
-        <div className="mb-12 text-center">
-          <h2 className="text-display-md uppercase font-bold">
-            Everything You Need to <span className="text-accent">Go Viral</span>
-          </h2>
-          <p className="mt-3 text-text-muted">Nine powerful tools, one platform.</p>
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
-            <Link
-              key={f.href}
-              href={f.href}
-              className="card group hover:border-white transition-colors"
-            >
-              <div className="flex h-12 w-12 items-center justify-center bg-surface-soft border border-hairline text-2xl">
-                {f.icon}
-              </div>
-              <h3 className="mt-4 text-lg font-bold text-white uppercase group-hover:text-accent transition-colors">
-                {f.name}
-              </h3>
-              <p className="mt-1.5 text-sm text-text-muted">
-                {f.desc}
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-bold text-text-muted uppercase tracking-[1.5px] opacity-0 transition-opacity group-hover:opacity-100">
-                Explore <span>{"\u2192"}</span>
-              </div>
-            </Link>
-          ))}
+      {/* Features */}
+      <section style={{ paddingBottom: '120px' }}>
+        <div className="editorial-container">
+          <div className="text-center mb-16">
+            <p className="section-label mb-3">PLATFORM</p>
+            <h2>Everything you need to <span className="text-accent">go viral</span></h2>
+          </div>
+          <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3" style={{ background: '#262626' }}>
+            {features.map((f) => (
+              <Link key={f.href} href={f.href}
+                className="group p-8 transition-colors hover:bg-surface-elevated" style={{ background: '#141414' }}>
+                <h6 className="group-hover:text-accent transition-colors">{f.name}</h6>
+                <p className="text-xs text-muted mt-2" style={{ fontWeight: 300 }}>{f.desc}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-hairline py-10 text-center text-sm text-text-muted">
-        <p>&copy; 2026 Viraly. Built for creators who want to grow.</p>
+      <footer style={{ borderTop: '1px solid #262626', padding: '40px 0' }} className="text-center">
+        <p className="caption-upper">&copy; 2026 VIRALY. BUILT FOR CREATORS WHO WANT TO GROW.</p>
       </footer>
     </div>
   )

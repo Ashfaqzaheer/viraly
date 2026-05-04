@@ -51,36 +51,30 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-black">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex justify-center mb-10">
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="text-display-md text-white font-bold uppercase">VIRALY</span>
-          </Link>
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#000000' }}>
+      <div className="w-full max-w-[440px]">
+        {/* Wordmark */}
+        <div className="text-center mb-10">
+          <Link href="/" className="wordmark inline-block">VIRALY</Link>
+          <p className="caption-upper mt-3">YOUR CREATOR TOOLKIT</p>
         </div>
 
         {/* Card */}
-        <div className="bg-surface-card border border-hairline p-8 sm:p-10">
+        <div style={{ background: '#141414', border: '1px solid #262626', padding: '48px' }}>
           <div className="text-center mb-8">
-            <h1 className="text-display-sm uppercase font-bold text-white mb-1.5">Create Account</h1>
-            <p className="text-body-sm text-text-muted">Start growing your audience with AI</p>
+            <h4>Create account</h4>
+            <p className="mt-2 text-sm text-muted">Start growing your audience with AI</p>
           </div>
 
           {error && (
-            <div
-              role="alert"
-              className="mb-5 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
-            >
+            <div role="alert" className="mb-5 border border-red-500/30 px-4 py-3 text-sm text-red-400">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             <div>
-              <label htmlFor="email" className="label">
-                Email
-              </label>
+              <label htmlFor="email" className="field-label">EMAIL</label>
               <input
                 id="email"
                 type="email"
@@ -94,9 +88,8 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="label">
-                Password
-                <span className="ml-1.5 normal-case tracking-normal text-text-muted font-normal">(min. 8 characters)</span>
+              <label htmlFor="password" className="field-label">
+                PASSWORD <span className="text-muted" style={{ textTransform: 'none', letterSpacing: '0' }}>(min. 8 characters)</span>
               </label>
               <div className="relative">
                 <input
@@ -108,13 +101,13 @@ export default function RegisterPage() {
                   key={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input pr-11"
+                  className="input pr-10"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-muted hover:text-white transition-colors"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -122,22 +115,23 @@ export default function RegisterPage() {
               </div>
               {/* Password strength indicator */}
               {password.length > 0 && (
-                <div className="mt-2.5 space-y-1.5">
-                  <div className="flex gap-1">
+                <div className="mt-3 space-y-1.5">
+                  <div className="progress-track flex gap-1">
                     {[1, 2, 3, 4].map((level) => (
                       <div
                         key={level}
-                        className={`h-1 flex-1 transition-all duration-300 ${
-                          level <= passwordStrength.level
-                            ? passwordStrength.level <= 1 ? 'bg-red-500' : passwordStrength.level <= 2 ? 'bg-amber-500' : passwordStrength.level <= 3 ? 'bg-accent' : 'bg-emerald-400'
-                            : 'bg-hairline'
-                        }`}
+                        className="h-[2px] flex-1 transition-all duration-300"
+                        style={{
+                          background: level <= passwordStrength.level
+                            ? passwordStrength.level <= 1 ? '#ef4444' : passwordStrength.level <= 2 ? '#f59e0b' : passwordStrength.level <= 3 ? '#8b5cf6' : '#34d399'
+                            : '#262626'
+                        }}
                       />
                     ))}
                   </div>
-                  <p className={`text-xs ${
-                    passwordStrength.level <= 1 ? 'text-red-400' : passwordStrength.level <= 2 ? 'text-amber-400' : passwordStrength.level <= 3 ? 'text-accent' : 'text-emerald-400'
-                  }`}>
+                  <p className="text-xs" style={{
+                    color: passwordStrength.level <= 1 ? '#ef4444' : passwordStrength.level <= 2 ? '#f59e0b' : passwordStrength.level <= 3 ? '#8b5cf6' : '#34d399'
+                  }}>
                     {passwordStrength.label}
                   </p>
                 </div>
@@ -161,42 +155,26 @@ export default function RegisterPage() {
           </form>
 
           <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-hairline" />
-            <span className="text-xs text-text-muted uppercase tracking-[1.5px]">or</span>
-            <div className="flex-1 h-px bg-hairline" />
+            <div className="flex-1 h-px" style={{ background: '#262626' }} />
+            <span className="caption-upper">OR</span>
+            <div className="flex-1 h-px" style={{ background: '#262626' }} />
           </div>
 
           <button
             type="button"
             onClick={handleGoogleRegister}
-            className="btn-secondary w-full gap-3"
+            className="btn-ghost w-full gap-3"
           >
             <GoogleIcon />
             CONTINUE WITH GOOGLE
           </button>
 
-          <p className="mt-7 text-center text-sm text-text-muted">
+          <p className="mt-8 text-center text-sm text-muted">
             Already have an account?{' '}
-            <Link href="/login" className="font-bold text-white hover:text-accent transition-colors">
+            <Link href="/login" className="text-accent hover:text-white transition-colors">
               Log in
             </Link>
           </p>
-        </div>
-
-        {/* Trust badges */}
-        <div className="mt-6 flex items-center justify-center gap-6 text-text-muted text-xs">
-          <span className="flex items-center gap-1.5">
-            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
-            Encrypted
-          </span>
-          <span className="flex items-center gap-1.5">
-            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-            Secure
-          </span>
-          <span className="flex items-center gap-1.5">
-            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" /></svg>
-            Private
-          </span>
         </div>
       </div>
     </div>
@@ -220,7 +198,7 @@ function getPasswordStrength(pw: string): { level: number; label: string } {
 
 function EyeIcon() {
   return (
-    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
@@ -229,7 +207,7 @@ function EyeIcon() {
 
 function EyeOffIcon() {
   return (
-    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
     </svg>
   )

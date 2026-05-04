@@ -37,65 +37,76 @@ export default function AnalyticsPage() {
     } catch {} finally { setExporting(false) }
   }
 
-  function growthBadge(v: number) {
-    if (v > 0) return <span className="text-emerald-400">+{v}</span>
-    if (v < 0) return <span className="text-red-400">{v}</span>
-    return <span className="text-text-muted">0</span>
-  }
+  function growthColor(v: number) { return v > 0 ? '#34d399' : v < 0 ? '#ef4444' : '#666666' }
+  function growthText(v: number) { return v > 0 ? `+${v}` : `${v}` }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-black"><div className="flex items-center gap-3"><span className="spinner" /><span className="text-sm text-text-muted">Loading analytics...</span></div></div>
-  if (error) return <div className="min-h-screen flex items-center justify-center px-4 bg-black"><div role="alert" className="card border-red-500/30 bg-red-500/10 p-6 text-center max-w-md"><p className="text-sm text-red-300">{error}</p></div></div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ background: '#000000' }}><span className="spinner" /></div>
+  if (error) return <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#000000' }}><div className="border border-red-500/30 p-6 text-center max-w-md"><p className="text-sm text-red-400">{error}</p></div></div>
 
   return (
-    <div className="min-h-screen bg-black">
-      <main className="mx-auto max-w-4xl px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen" style={{ background: '#000000' }}>
+      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px' }}>
+        <div className="flex items-center justify-between mb-10">
           <div>
-            <Link href="/dashboard" className="text-xs text-text-muted hover:text-white transition-colors mb-2 inline-block uppercase tracking-[1.5px]">{"\u2190"} Dashboard</Link>
-            <h1 className="text-display-md uppercase font-bold text-white">Analytics</h1>
+            <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
+            <p className="section-label mb-2">GROWTH METRICS</p>
+            <h3>Analytics</h3>
           </div>
-          <button type="button" onClick={handleExport} disabled={exporting} className="btn-secondary h-10 px-4 text-xs disabled:opacity-50">
+          <button type="button" onClick={handleExport} disabled={exporting} className="btn-ghost">
             {exporting ? 'EXPORTING...' : 'EXPORT CSV'}
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Followers', value: data?.followerCount?.toLocaleString() ?? '0' },
-            { label: 'Growth (7d)', value: growthBadge(data?.followerGrowth7d ?? 0) },
-            { label: 'Growth (30d)', value: growthBadge(data?.followerGrowth30d ?? 0) },
-            { label: 'Consistency', value: `${data?.postingConsistency30d ?? 0}%` },
-          ].map((m) => (
-            <div key={m.label} className="spec-cell text-center">
-              <p className="spec-value">{m.value}</p>
-              <p className="spec-label">{m.label}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="spec-cell text-center">
-            <p className="spec-value text-accent streak-pulse">{data?.streak.current ?? 0}</p>
-            <p className="spec-label">Current Streak</p>
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px mb-10" style={{ background: '#262626' }}>
+          <div style={{ background: '#141414', padding: '24px' }}>
+            <p className="spec-value" style={{ fontSize: '36px' }}>{data?.followerCount?.toLocaleString() ?? '0'}</p>
+            <p className="spec-label">FOLLOWERS</p>
           </div>
-          <div className="spec-cell text-center">
-            <p className="spec-value">{data?.streak.highest ?? 0}</p>
-            <p className="spec-label">Best Streak</p>
+          <div style={{ background: '#141414', padding: '24px' }}>
+            <p className="spec-value" style={{ fontSize: '36px', color: growthColor(data?.followerGrowth7d ?? 0) }}>{growthText(data?.followerGrowth7d ?? 0)}</p>
+            <p className="spec-label">GROWTH (7D)</p>
+          </div>
+          <div style={{ background: '#141414', padding: '24px' }}>
+            <p className="spec-value" style={{ fontSize: '36px', color: growthColor(data?.followerGrowth30d ?? 0) }}>{growthText(data?.followerGrowth30d ?? 0)}</p>
+            <p className="spec-label">GROWTH (30D)</p>
+          </div>
+          <div style={{ background: '#141414', padding: '24px' }}>
+            <p className="spec-value" style={{ fontSize: '36px' }}>{data?.postingConsistency30d ?? 0}%</p>
+            <p className="spec-label">CONSISTENCY</p>
           </div>
         </div>
 
-        <h2 className="text-title-lg uppercase font-bold text-white mb-3">Submitted Reels</h2>
+        {/* Streak */}
+        <div className="grid grid-cols-2 gap-px mb-10" style={{ background: '#262626' }}>
+          <div style={{ background: '#141414', padding: '24px' }}>
+            <p className="spec-value text-accent" style={{ fontSize: '36px' }}>{data?.streak.current ?? 0}</p>
+            <p className="spec-label">CURRENT STREAK</p>
+          </div>
+          <div style={{ background: '#141414', padding: '24px' }}>
+            <p className="spec-value" style={{ fontSize: '36px' }}>{data?.streak.highest ?? 0}</p>
+            <p className="spec-label">BEST STREAK</p>
+          </div>
+        </div>
+
+        {/* Reels */}
+        <p className="caption-upper mb-4">SUBMITTED REELS</p>
         {!data?.reels.length ? (
-          <div className="card p-8 text-center"><p className="text-sm text-text-muted">No reels submitted yet.</p></div>
+          <p className="text-sm text-muted text-center py-8" style={{ fontWeight: 300 }}>No reels submitted yet.</p>
         ) : (
-          <div className="space-y-2">{data.reels.map((r) => (
-            <div key={r.id} className="card flex items-center justify-between hover:border-white transition-colors">
-              <div className="min-w-0 flex-1"><p className="text-sm text-text-body truncate">{r.url}</p><p className="text-xs text-text-muted mt-0.5">{new Date(r.submittedAt).toLocaleString()}</p></div>
-              {r.viralityScore !== null && (
-                <span className={`shrink-0 ml-3 text-sm font-bold ${r.viralityScore >= 70 ? 'text-emerald-400' : r.viralityScore >= 40 ? 'text-amber-400' : 'text-red-400'}`}>{r.viralityScore}/100</span>
-              )}
-            </div>
-          ))}</div>
+          <div>
+            {data.reels.map((r) => (
+              <div key={r.id} className="flex items-center justify-between" style={{ borderBottom: '1px solid #262626', padding: '16px 0' }}>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-white truncate" style={{ fontWeight: 300 }}>{r.url}</p>
+                  <p className="text-xs text-muted mt-0.5">{new Date(r.submittedAt).toLocaleString()}</p>
+                </div>
+                {r.viralityScore !== null && (
+                  <span className="text-sm" style={{ fontWeight: 400, color: r.viralityScore >= 70 ? '#34d399' : r.viralityScore >= 40 ? '#f59e0b' : '#ef4444' }}>{r.viralityScore}/100</span>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </main>
     </div>

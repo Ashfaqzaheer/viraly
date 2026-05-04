@@ -1,51 +1,47 @@
 export default function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-black">
-      <main className="mx-auto max-w-6xl px-6 py-10">
+    <div className="min-h-screen" style={{ background: '#000000' }}>
+      <main className="editorial-container" style={{ paddingTop: '48px' }}>
         {/* Header skeleton */}
         <div className="mb-10">
-          <div className="h-9 w-72 bg-surface-card animate-pulse" />
-          <div className="h-4 w-56 bg-surface-soft animate-pulse mt-3" />
+          <div className="h-3 w-24 animate-pulse" style={{ background: '#141414' }} />
+          <div className="h-8 w-64 animate-pulse mt-4" style={{ background: '#141414' }} />
         </div>
 
         {/* Streak band skeleton */}
-        <div className="bg-surface-soft border border-hairline border-t-4 border-t-accent p-6 mb-6 animate-pulse">
-          <div className="flex items-center gap-6">
-            <div className="h-10 w-16 bg-surface-card" />
-            <div className="h-10 w-px bg-hairline" />
-            <div className="h-10 w-16 bg-surface-card" />
+        <div className="animate-pulse" style={{ borderBottom: '1px solid #262626', paddingBottom: '32px', marginBottom: '32px' }}>
+          <div className="flex items-center gap-8">
+            <div>
+              <div className="h-12 w-20" style={{ background: '#141414' }} />
+              <div className="h-3 w-16 mt-2" style={{ background: '#141414' }} />
+            </div>
+            <div>
+              <div className="h-12 w-16" style={{ background: '#141414' }} />
+              <div className="h-3 w-12 mt-2" style={{ background: '#141414' }} />
+            </div>
           </div>
         </div>
 
         {/* Mission card skeleton */}
-        <div className="card-elevated mb-6 animate-pulse">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="h-5 w-5 bg-surface-soft" />
-                <div className="h-4 w-28 bg-surface-soft" />
-              </div>
-              <div className="h-6 w-full max-w-md bg-surface-card mb-2" />
-              <div className="h-4 w-3/4 bg-surface-soft" />
-            </div>
-          </div>
-          {/* Buttons */}
+        <div className="animate-pulse mb-10" style={{ background: '#141414', border: '1px solid #262626', borderTop: '2px solid #8b5cf6', padding: '24px' }}>
+          <div className="h-3 w-32 mb-4" style={{ background: '#262626' }} />
+          <div className="h-5 w-full max-w-md mb-2" style={{ background: '#262626' }} />
+          <div className="h-4 w-3/4 mb-6" style={{ background: '#1f1f1f' }} />
           <div className="flex gap-3">
-            <div className="h-12 w-36 bg-surface-card border border-hairline" />
-            <div className="h-12 w-36 bg-surface-soft border border-hairline" />
+            <div className="h-11 w-32" style={{ background: '#262626', borderRadius: '9999px' }} />
+            <div className="h-11 w-36" style={{ background: '#1f1f1f', borderRadius: '9999px' }} />
           </div>
         </div>
 
-        {/* Feature cards grid skeleton */}
-        <nav className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="card h-[140px] animate-pulse">
-              <div className="h-10 w-10 bg-surface-soft mb-3" />
-              <div className="h-4 w-20 bg-surface-card mb-2" />
-              <div className="h-3 w-32 bg-surface-soft" />
+        {/* Feature grid skeleton */}
+        <div className="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-3" style={{ background: '#262626' }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse" style={{ background: '#141414', padding: '24px' }}>
+              <div className="h-4 w-20 mb-2" style={{ background: '#262626' }} />
+              <div className="h-3 w-32" style={{ background: '#1f1f1f' }} />
             </div>
           ))}
-        </nav>
+        </div>
       </main>
     </div>
   )

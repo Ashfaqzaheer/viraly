@@ -11,11 +11,11 @@ interface ReelFeedback { scores: FeedbackScores; commentary: FeedbackCommentary 
 interface Submission { id: string; url: string; feedback: ReelFeedback | null; submittedAt: string }
 
 const SCORE_LABELS: { key: keyof FeedbackScores; label: string }[] = [
-  { key: 'hookStrength', label: 'Hook Strength' },
-  { key: 'pacing', label: 'Pacing' },
-  { key: 'captionQuality', label: 'Caption Quality' },
-  { key: 'hashtagRelevance', label: 'Hashtag Relevance' },
-  { key: 'ctaEffectiveness', label: 'CTA Effectiveness' },
+  { key: 'hookStrength', label: 'HOOK STRENGTH' },
+  { key: 'pacing', label: 'PACING' },
+  { key: 'captionQuality', label: 'CAPTION QUALITY' },
+  { key: 'hashtagRelevance', label: 'HASHTAG RELEVANCE' },
+  { key: 'ctaEffectiveness', label: 'CTA EFFECTIVENESS' },
 ]
 const MAX_DAILY = 10
 
@@ -50,58 +50,59 @@ export default function ReelsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <main className="mx-auto max-w-3xl px-6 py-10">
-        <Link href="/dashboard" className="text-xs text-text-muted hover:text-white transition-colors mb-2 inline-block uppercase tracking-[1.5px]">{"\u2190"} Dashboard</Link>
-        <h1 className="text-display-md uppercase font-bold text-white mb-1">Reel Feedback</h1>
-        <p className="text-body-sm text-text-muted mb-8">{remaining} of {MAX_DAILY} submissions remaining today</p>
+    <div className="min-h-screen" style={{ background: '#000000' }}>
+      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px', maxWidth: '800px' }}>
+        <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
+        <p className="section-label mb-2">AI FEEDBACK</p>
+        <h3 className="mb-2">Reel feedback</h3>
+        <p className="text-sm text-muted mb-8" style={{ fontWeight: 300 }}>{remaining} of {MAX_DAILY} submissions remaining today</p>
 
         {/* Submit form */}
-        <div className="card-soft mb-8">
-          <label htmlFor="reel-url" className="label">Reel URL (Instagram or TikTok)</label>
-          <form onSubmit={handleSubmit} className="flex gap-3">
-            <input id="reel-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://www.instagram.com/reel/..." required
-              className="input flex-1" />
+        <div style={{ background: '#0d0d0d', borderTop: '1px solid #262626', borderBottom: '1px solid #262626', padding: '32px 0' }} className="mb-10">
+          <label htmlFor="reel-url" className="field-label">REEL URL (INSTAGRAM OR TIKTOK)</label>
+          <form onSubmit={handleSubmit} className="flex gap-4 items-end">
+            <input id="reel-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://www.instagram.com/reel/..." required className="input flex-1" />
             <button type="submit" disabled={submitting || remaining === 0} className="btn-primary shrink-0">
               {submitting ? 'ANALYZING...' : 'ANALYZE'}
             </button>
           </form>
-          {error && <p role="alert" className="mt-3 text-sm text-red-300">{error}</p>}
+          {error && <p role="alert" className="mt-3 text-sm text-red-400">{error}</p>}
         </div>
 
         {/* Feedback detail */}
         {selected?.feedback && (
-          <div className="card mb-8">
-            <h2 className="text-title-lg uppercase font-bold text-white mb-1">Feedback</h2>
-            <p className="text-xs text-text-muted mb-5 truncate">{selected.url}</p>
-            <div className="space-y-5">
-              {SCORE_LABELS.map(({ key, label }) => (
-                <div key={key}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm font-bold text-text-body">{label}</span>
-                    <span className="text-sm font-bold text-white">{selected.feedback!.scores[key]}<span className="text-text-muted">/100</span></span>
-                  </div>
-                  <div className="w-full bg-hairline h-1 overflow-hidden">
-                    <div className="bg-accent h-1 transition-all duration-700" style={{ width: `${selected.feedback!.scores[key]}%` }} />
-                  </div>
-                  <p className="text-xs text-text-muted mt-1.5">{selected.feedback!.commentary[key]}</p>
+          <div className="mb-10">
+            <p className="caption-upper mb-2">FEEDBACK</p>
+            <p className="text-xs text-muted mb-6 truncate" style={{ fontWeight: 300 }}>{selected.url}</p>
+            {SCORE_LABELS.map(({ key, label }) => (
+              <div key={key} style={{ borderBottom: '1px solid #262626', padding: '16px 0' }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="caption-upper">{label}</span>
+                  <span className="text-sm text-white" style={{ fontWeight: 400 }}>{selected.feedback!.scores[key]}/100</span>
                 </div>
-              ))}
-            </div>
+                <div className="progress-track"><div className="progress-fill" style={{ width: `${selected.feedback!.scores[key]}%` }} /></div>
+                <p className="text-xs text-muted mt-2" style={{ fontWeight: 300 }}>{selected.feedback!.commentary[key]}</p>
+              </div>
+            ))}
           </div>
         )}
 
         {/* History */}
-        <h2 className="text-title-lg uppercase font-bold text-white mb-3">Submission History</h2>
-        {loading ? <p className="text-sm text-text-muted">Loading...</p> : history.length === 0 ? (
-          <div className="card p-8 text-center"><p className="text-sm text-text-muted">No submissions yet. Submit your first reel above.</p></div>
+        <p className="caption-upper mb-4">SUBMISSION HISTORY</p>
+        {loading ? <div className="flex justify-center py-8"><span className="spinner" /></div> : history.length === 0 ? (
+          <p className="text-sm text-muted text-center py-8" style={{ fontWeight: 300 }}>No submissions yet. Submit your first reel above.</p>
         ) : (
-          <div className="space-y-2">
+          <div>
             {history.map((s) => (
               <button key={s.id} type="button" onClick={() => setSelected(s)}
-                className={`w-full text-left p-4 transition-colors border ${selected?.id === s.id ? 'bg-surface-card border-white' : 'bg-surface-card border-hairline hover:border-white'}`}>
-                <p className="text-sm text-text-body truncate">{s.url}</p>
-                <p className="text-xs text-text-muted mt-1">{new Date(s.submittedAt).toLocaleString()}</p>
+                className="w-full text-left flex items-center justify-between transition-colors hover:bg-surface-card" style={{
+                  borderBottom: '1px solid #262626', padding: '16px 0',
+                  background: selected?.id === s.id ? '#141414' : 'transparent'
+                }}>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm truncate" style={{ fontWeight: 300, color: selected?.id === s.id ? '#ffffff' : '#999999' }}>{s.url}</p>
+                  <p className="text-xs text-muted mt-0.5">{new Date(s.submittedAt).toLocaleString()}</p>
+                </div>
               </button>
             ))}
           </div>

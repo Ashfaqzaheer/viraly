@@ -23,66 +23,67 @@ export default function TrendsPage() {
       try {
         const q = niche ? `?niche=${encodeURIComponent(niche)}` : ''
         const res = await apiFetch<{ trends: Trend[]; isFallback?: boolean }>(`/trends${q}`, getToken)
-        setTrends(res.trends)
-        setIsFallback(res.isFallback ?? false)
-      }
-      catch (err) { setError(err instanceof Error ? err.message : 'Failed to load trends') }
+        setTrends(res.trends); setIsFallback(res.isFallback ?? false)
+      } catch (err) { setError(err instanceof Error ? err.message : 'Failed to load trends') }
       finally { setLoading(false) }
     }
     load()
   }, [getToken, niche])
 
   return (
-    <div className="min-h-screen bg-black">
-      <main className="mx-auto max-w-4xl px-6 py-10">
-        <Link href="/dashboard" className="text-xs text-text-muted hover:text-white transition-colors mb-2 inline-block uppercase tracking-[1.5px]">{"\u2190"} Dashboard</Link>
-        <h1 className="text-display-md uppercase font-bold text-white mb-1">Trend Radar</h1>
-        <p className="text-body-sm text-text-muted mb-6">Trending content formats updated daily.</p>
+    <div className="min-h-screen" style={{ background: '#000000' }}>
+      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px' }}>
+        <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
+        <p className="section-label mb-2">CONTENT INTELLIGENCE</p>
+        <h3 className="mb-2">Trend radar</h3>
+        <p className="text-sm text-muted mb-8" style={{ fontWeight: 300 }}>Trending content formats updated daily.</p>
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          <button type="button" onClick={() => setNiche('')} className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-[1.5px] border transition-colors ${!niche ? 'border-white text-white' : 'border-hairline text-text-muted hover:text-white hover:border-white'}`}>All</button>
+        {/* Filter tabs */}
+        <div className="flex flex-wrap gap-2 mb-10">
+          <button type="button" onClick={() => setNiche('')}
+            className={`nav-item px-3 py-1.5 transition-colors ${!niche ? 'text-white' : ''}`}
+            style={{ borderBottom: !niche ? '1px solid #ffffff' : '1px solid transparent' }}>
+            ALL
+          </button>
           {NICHES.map((n) => (
-            <button key={n} type="button" onClick={() => setNiche(n)} className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-[1.5px] border transition-colors ${niche === n ? 'border-white text-white' : 'border-hairline text-text-muted hover:text-white hover:border-white'}`}>
-              {n.charAt(0).toUpperCase() + n.slice(1)}
+            <button key={n} type="button" onClick={() => setNiche(n)}
+              className={`nav-item px-3 py-1.5 transition-colors ${niche === n ? 'text-white' : ''}`}
+              style={{ borderBottom: niche === n ? '1px solid #ffffff' : '1px solid transparent' }}>
+              {n.toUpperCase()}
             </button>
           ))}
         </div>
 
-        {error && <div role="alert" className="mb-6 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
+        {error && <div role="alert" className="mb-6 border border-red-500/30 px-4 py-3 text-sm text-red-400">{error}</div>}
 
         {isFallback && !loading && trends.length > 0 && (
-          <div className="mb-4 border border-amber-500/30 bg-amber-500/10 px-4 py-3">
-            <p className="text-xs text-amber-300">{"\u{1F525}"} Showing recent trends (auto-refresh pending)</p>
+          <div className="mb-6 border border-amber-500/30 px-4 py-3">
+            <p className="text-xs text-amber-300" style={{ fontWeight: 300 }}>Showing recent trends (auto-refresh pending)</p>
           </div>
         )}
 
         {loading ? (
-          <div className="flex items-center gap-3 justify-center py-12"><span className="spinner" /><span className="text-sm text-text-muted">Loading trends...</span></div>
+          <div className="flex items-center gap-3 justify-center py-12"><span className="spinner" /><span className="text-sm text-muted">Loading trends...</span></div>
         ) : trends.length === 0 ? (
-          <div className="card p-8 text-center"><p className="text-sm text-text-muted">No trends found{niche ? ` for "${niche}"` : ''}.</p></div>
+          <div className="text-center py-12"><p className="text-sm text-muted">No trends found{niche ? ` for "${niche}"` : ''}.</p></div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-px sm:grid-cols-2" style={{ background: '#262626' }}>
             {trends.map((t) => {
               const stale = isStale(t.updatedAt)
               return (
-                <div key={t.id} className={`card transition-all ${stale ? 'opacity-40' : ''}`}>
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-sm font-bold text-white uppercase">{t.title}</h3>
-                    <span className="shrink-0 ml-2 tag tag-accent text-xs">+{t.engagementLiftPercent}%</span>
-                  </div>
-                  <p className="text-sm text-text-body mb-3">{t.description}</p>
-                  <div className="bg-surface-soft border border-hairline p-3 mb-3">
-                    <p className="spec-label mb-1">Example Format</p>
-                    <p className="text-sm text-text-body">{t.exampleFormat}</p>
+                <div key={t.id} className={`transition-all ${stale ? 'opacity-40' : ''}`} style={{ background: '#141414', padding: '24px' }}>
+                  <p className="caption-upper mb-2">{t.niche}</p>
+                  <h5 className="mb-2">{t.title}</h5>
+                  <p className="text-sm text-body mb-3" style={{ fontWeight: 300 }}>{t.description}</p>
+                  <div style={{ borderTop: '1px solid #262626', paddingTop: '12px', marginBottom: '12px' }}>
+                    <p className="caption-upper mb-1">EXAMPLE FORMAT</p>
+                    <p className="text-sm text-body" style={{ fontWeight: 300 }}>{t.exampleFormat}</p>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="tag text-xs">{t.niche}</span>
-                    <div className="flex items-center gap-2">
-                      {stale && <span className="text-xs text-amber-400 font-bold uppercase">Stale</span>}
-                      <Link href={`/scripts?mode=trend&idea=${encodeURIComponent(t.title + ' - ' + t.exampleFormat)}`} className="btn-primary text-xs h-8 px-3 tracking-[1px]">
-                        {"\u{1F3AC}"} SCRIPT
-                      </Link>
-                    </div>
+                    <span className="text-lg text-white" style={{ fontWeight: 400, letterSpacing: '2px' }}>+{t.engagementLiftPercent}%</span>
+                    <Link href={`/scripts?mode=trend&idea=${encodeURIComponent(t.title + ' - ' + t.exampleFormat)}`} className="btn-primary text-xs h-8 px-4">
+                      SCRIPT
+                    </Link>
                   </div>
                 </div>
               )

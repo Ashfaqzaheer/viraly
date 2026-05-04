@@ -2,207 +2,493 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUGATTI DESIGN SYSTEM
+   Pure black canvas, monochrome discipline, weight-400 display type,
+   pill-shaped transparent buttons, zero decoration.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @layer base {
   :root {
     --canvas: #000000;
-    --surface-soft: #0d0d0d;
-    --surface-card: #1a1a1a;
-    --surface-elevated: #262626;
-    --carbon: #2b2b2b;
-    --hairline: #3c3c3c;
-    --hairline-strong: #262626;
-    --text-primary: #ffffff;
-    --text-body: #bbbbbb;
-    --text-body-strong: #e6e6e6;
-    --text-muted: #7e7e7e;
+    --surface-card: #141414;
+    --surface-elevated: #1f1f1f;
+    --hairline: #262626;
+    --ink: #ffffff;
+    --body: #999999;
+    --muted: #666666;
     --accent: #8b5cf6;
-    --accent-dim: rgba(139, 92, 246, 0.15);
-    --spacing-section: 96px;
-    --spacing-xxl: 64px;
-    --spacing-xl: 40px;
-    --spacing-lg: 24px;
-    --spacing-md: 16px;
+    --accent-hover: #7c3aed;
   }
 
-  * { border-radius: 0 !important; box-sizing: border-box; }
-  
-  .rounded-full { border-radius: 9999px !important; }
-  
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html { font-size: 16px; }
+
   body {
     background: #000000;
-    color: #bbbbbb;
-    font-family: var(--font-inter), Inter, system-ui, sans-serif;
+    color: #999999;
+    font-family: var(--font-inter), Inter, -apple-system, system-ui, sans-serif;
     font-weight: 300;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3 {
+  /* Display type: weight 400, UPPERCASE, wide letter-spacing */
+  h1 {
+    font-size: clamp(48px, 8vw, 80px);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: 4px;
     color: #ffffff;
-    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0;
   }
-
-  h4, h5, h6 {
+  h2 {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: 3px;
     color: #ffffff;
-    font-weight: 700;
+    text-transform: uppercase;
+  }
+  h3 {
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-transform: uppercase;
+  }
+  h4 {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-transform: uppercase;
+  }
+  h5 {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-transform: uppercase;
+  }
+  h6 {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-transform: uppercase;
   }
 
-  p { color: #bbbbbb; font-weight: 300; }
+  p {
+    color: #999999;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  a:hover { color: #8b5cf6; }
 
   ::selection { background: rgba(139, 92, 246, 0.3); color: #fff; }
-  
-  hr { border: none; border-top: 1px solid #3c3c3c; }
+  hr { border: none; border-top: 1px solid #262626; margin: 0; }
 }
 
 @layer components {
-  .btn-primary {
-    background: transparent;
-    border: 1px solid #ffffff;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
+  /* ─── Editorial Container ─────────────────────────────────────────────── */
+  .editorial {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  @media (min-width: 768px) { .editorial { padding: 0 48px; } }
+  @media (min-width: 1280px) { .editorial { padding: 0 64px; } }
+
+  /* Legacy alias */
+  .editorial-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  @media (min-width: 768px) { .editorial-container { padding: 0 48px; } }
+  @media (min-width: 1280px) { .editorial-container { padding: 0 64px; } }
+
+  /* ─── Wordmark ────────────────────────────────────────────────────────── */
+  .wordmark {
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 6px;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    height: 48px;
-    padding: 0 32px;
-    border-radius: 0;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .wordmark:hover { color: #ffffff; }
+
+  /* ─── Mono Voice (nav, badges, section labels) ────────────────────────── */
+  .mono-voice {
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* ─── Section Label ───────────────────────────────────────────────────── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: #666666;
+  }
+
+  /* ─── Caption Upper ───────────────────────────────────────────────────── */
+  .caption-upper {
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666666;
+  }
+
+  /* ─── Buttons: Transparent Pills ──────────────────────────────────────── */
+  .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    height: 44px;
+    padding: 0 28px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
   }
   .btn-primary:hover { background: #ffffff; color: #000000; }
   .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  .btn-secondary {
-    background: #1a1a1a;
-    border: 1px solid #3c3c3c;
-    color: #bbbbbb;
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    height: 48px;
-    padding: 0 32px;
-    border-radius: 0;
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+  .btn-ghost {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    background: transparent;
+    color: #999999;
+    border: 1px solid #262626;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    height: 44px;
+    padding: 0 28px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
   }
-  .btn-secondary:hover { border-color: #ffffff; color: #ffffff; }
+  .btn-ghost:hover { border-color: #ffffff; color: #ffffff; }
+  .btn-ghost:disabled { opacity: 0.3; cursor: not-allowed; }
 
   .btn-accent {
-    background: transparent;
-    border: 1px solid #8b5cf6;
-    color: #8b5cf6;
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    height: 48px;
-    padding: 0 32px;
-    border-radius: 0;
-    cursor: pointer;
-    transition: background 0.15s;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    background: transparent;
+    color: #8b5cf6;
+    border: 1px solid #8b5cf6;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    height: 44px;
+    padding: 0 28px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
   }
-  .btn-accent:hover { background: rgba(139, 92, 246, 0.1); }
+  .btn-accent:hover { background: #8b5cf6; color: #ffffff; }
 
-  .card { background: #1a1a1a; border: 1px solid #3c3c3c; padding: 24px; }
-  .card-elevated { background: #262626; border: 1px solid #3c3c3c; padding: 24px; }
-  .card-soft { background: #0d0d0d; border: 1px solid #3c3c3c; padding: 24px; }
-  .card-streak { background: #1a1a1a; border: 1px solid #3c3c3c; border-top: 4px solid #8b5cf6; padding: 24px; }
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: #999999;
+    border: 1px solid #262626;
+    border-radius: 9999px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-icon:hover { border-color: #ffffff; color: #ffffff; }
 
+  /* ─── Cards ───────────────────────────────────────────────────────────── */
+  .card {
+    background: #141414;
+    border: 1px solid #262626;
+    padding: 24px;
+  }
+
+  .card-canvas {
+    background: #141414;
+    border: 1px solid #262626;
+    padding: 24px;
+  }
+
+  .card-flush {
+    background: #141414;
+    border-top: 1px solid #262626;
+    border-bottom: 1px solid #262626;
+    padding: 24px;
+  }
+
+  .streak-card {
+    background: #141414;
+    border: 1px solid #262626;
+    border-top: 2px solid #8b5cf6;
+    padding: 24px;
+  }
+
+  .card-streak {
+    background: #141414;
+    border: 1px solid #262626;
+    border-top: 2px solid #8b5cf6;
+    padding: 24px;
+  }
+
+  .card-elevated {
+    background: #1f1f1f;
+    border: 1px solid #262626;
+    padding: 24px;
+  }
+
+  /* ─── Inputs: Underline Only ──────────────────────────────────────────── */
   .input {
-    background: #1a1a1a;
-    border: 1px solid #3c3c3c;
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 300;
-    height: 48px;
-    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #262626;
     border-radius: 0;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 300;
+    font-family: inherit;
+    height: 44px;
+    padding: 0 0 8px 0;
     width: 100%;
-    transition: border-color 0.15s;
+    transition: border-color 0.2s;
   }
-  .input::placeholder { color: #7e7e7e; }
-  .input:focus { outline: none; border: 2px solid #ffffff; }
+  .input::placeholder { color: #666666; }
+  .input:focus { outline: none; border-bottom-color: #8b5cf6; }
 
   .textarea {
-    background: #1a1a1a;
-    border: 1px solid #3c3c3c;
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 300;
-    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #262626;
     border-radius: 0;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 300;
+    font-family: inherit;
+    padding: 12px 0;
     width: 100%;
     resize: vertical;
-    min-height: 120px;
-    transition: border-color 0.15s;
+    transition: border-color 0.2s;
+    line-height: 1.6;
   }
-  .textarea::placeholder { color: #7e7e7e; }
-  .textarea:focus { outline: none; border: 2px solid #ffffff; }
+  .textarea::placeholder { color: #666666; }
+  .textarea:focus { outline: none; border-bottom-color: #8b5cf6; }
 
-  .label {
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #7e7e7e;
+  select.input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+    padding-right: 20px;
+  }
+
+  /* ─── Field Label ─────────────────────────────────────────────────────── */
+  .field-label {
     display: block;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666666;
     margin-bottom: 8px;
   }
 
-  .divider { height: 1px; background: #3c3c3c; width: 100%; }
-  .divider-accent { height: 4px; background: #8b5cf6; width: 100%; }
+  /* ─── Nav Items ───────────────────────────────────────────────────────── */
+  .nav-item {
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #999999;
+    transition: color 0.2s;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: #ffffff; }
+  .nav-item.active { color: #ffffff; }
 
+  /* Legacy nav-link alias */
+  .nav-link {
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #999999;
+    transition: color 0.2s;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .nav-link:hover, .nav-link.active { color: #ffffff; }
+
+  /* ─── Tags ────────────────────────────────────────────────────────────── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #999999;
+    border: 1px solid #262626;
+    border-radius: 9999px;
+    padding: 4px 12px;
+  }
+
+  .tag-accent {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 9999px;
+    padding: 4px 12px;
+  }
+
+  /* ─── Badge (legacy compat) ───────────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #999999;
+    border: 1px solid #262626;
+    border-radius: 9999px;
+    padding: 4px 12px;
+  }
+
+  .badge-accent {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 9999px;
+    padding: 4px 12px;
+  }
+
+  /* ─── Spec Cell ───────────────────────────────────────────────────────── */
   .spec-cell {
-    background: #0d0d0d;
-    border: 1px solid #3c3c3c;
-    padding: 24px;
+    border-top: 1px solid #262626;
+    padding: 20px 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-  .spec-value { font-size: 32px; font-weight: 700; color: #ffffff; line-height: 1.15; }
-  .spec-label { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #7e7e7e; }
 
-  .tag {
-    display: inline-block;
-    background: #0d0d0d;
-    border: 1px solid #3c3c3c;
-    color: #7e7e7e;
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    padding: 4px 12px;
-    border-radius: 0;
+  .spec-value {
+    font-size: 48px;
+    font-weight: 400;
+    color: #ffffff;
+    line-height: 1.0;
+    letter-spacing: 3px;
   }
-  .tag-accent { border-color: #8b5cf6; color: #8b5cf6; }
 
-  /* Spinner */
+  .spec-label {
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: #666666;
+  }
+
+  /* ─── Progress Track ──────────────────────────────────────────────────── */
+  .progress-track {
+    height: 2px;
+    background: #262626;
+    width: 100%;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #8b5cf6;
+    transition: width 0.3s ease;
+  }
+
+  /* ─── Hairline Dividers ───────────────────────────────────────────────── */
+  .hairline { height: 1px; background: #262626; width: 100%; }
+
+  /* ─── Spinner ─────────────────────────────────────────────────────────── */
   .spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #3c3c3c;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid #262626;
     border-top-color: #ffffff;
-    border-radius: 9999px !important;
+    border-radius: 9999px;
     animation: spin 0.6s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Streak pulse - the ONE allowed glow animation */
-  @keyframes streak-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
-    50% { box-shadow: 0 0 12px 2px rgba(139, 92, 246, 0.3); }
+  /* ─── Display Sizes (utility) ─────────────────────────────────────────── */
+  .display-xl {
+    font-size: clamp(48px, 8vw, 80px);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #ffffff;
   }
-  .streak-pulse { animation: streak-pulse 2s ease-in-out infinite; }
+
+  .display-lg {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+
+  .display-md {
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
 }

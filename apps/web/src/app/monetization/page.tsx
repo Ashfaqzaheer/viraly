@@ -5,19 +5,16 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/auth'
 import { apiFetch } from '@/lib/api'
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 interface Lesson { id: string; title: string; body: string; estimatedReadMin: number; audienceLevel: string; completed: boolean }
 interface Module { id: string; title: string; lessons: Lesson[]; completionPercent: number }
 
 type Tab = 'learn' | 'earnings' | 'sponsors' | 'payouts'
 
-const TABS: { key: Tab; label: string; icon: string }[] = [
-  { key: 'learn', label: 'Learn', icon: '📚' },
-  { key: 'earnings', label: 'Earnings', icon: '💰' },
-  { key: 'sponsors', label: 'Sponsors', icon: '🤝' },
-  { key: 'payouts', label: 'Payouts', icon: '💳' },
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'learn', label: 'Learn' },
+  { key: 'earnings', label: 'Earnings' },
+  { key: 'sponsors', label: 'Sponsors' },
+  { key: 'payouts', label: 'Payouts' },
 ]
 
 export default function MonetizationPage() {
@@ -36,8 +33,7 @@ export default function MonetizationPage() {
         apiFetch<{ modules: Module[] }>('/monetization/modules', getToken),
         apiFetch<{ percent: number }>('/monetization/progress', getToken),
       ])
-      setModules(modData.modules)
-      setOverallPercent(progressData.percent)
+      setModules(modData.modules); setOverallPercent(progressData.percent)
     } catch (err) { setError(err instanceof Error ? err.message : 'Failed to load modules') }
     finally { setLoading(false) }
   }
@@ -46,148 +42,117 @@ export default function MonetizationPage() {
 
   async function handleComplete(lessonId: string) {
     setCompleting(true)
-    try {
-      await apiFetch(`/monetization/lessons/${lessonId}/complete`, getToken, { method: 'POST' })
-      await loadData()
-      setActiveLesson(prev => prev ? { ...prev, completed: true } : null)
-    } catch {} finally { setCompleting(false) }
+    try { await apiFetch(`/monetization/lessons/${lessonId}/complete`, getToken, { method: 'POST' }); await loadData(); setActiveLesson(prev => prev ? { ...prev, completed: true } : null) }
+    catch {} finally { setCompleting(false) }
   }
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="flex items-center gap-3">
-        <span className="spinner" />
-        <span className="text-sm text-text-muted">Loading...</span>
-      </div>
-    </div>
-  )
+  if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ background: '#000000' }}><span className="spinner" /></div>
+  if (error) return <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#000000' }}><div className="border border-red-500/30 p-6 text-center max-w-md"><p className="text-sm text-red-400">{error}</p></div></div>
 
-  if (error) return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-black">
-      <div role="alert" className="card border-red-500/30 bg-red-500/10 p-6 text-center max-w-md">
-        <p className="text-sm text-red-300">{error}</p>
-      </div>
-    </div>
-  )
-
-  // Lesson reader view
+  // Lesson reader
   if (activeLesson) return (
-    <div className="min-h-screen bg-black">
-      <main className="mx-auto max-w-2xl px-4 sm:px-6 py-8">
-        <button type="button" onClick={() => setActiveLesson(null)} className="text-xs text-accent hover:text-white transition-colors mb-4 inline-block uppercase tracking-[1.5px]">{"\u2190"} Back to modules</button>
-        <div className="card-elevated">
-          <div className="flex items-center gap-2 mb-3">
-            <span className={`tag text-xs ${
-              activeLesson.audienceLevel === 'beginner' ? 'tag-accent'
-                : activeLesson.audienceLevel === 'intermediate' ? 'border-amber-500 text-amber-400'
-                : 'border-red-500 text-red-400'
-            }`}>{activeLesson.audienceLevel}</span>
-            <span className="text-xs text-text-muted">{activeLesson.estimatedReadMin} min read</span>
+    <div className="min-h-screen" style={{ background: '#000000' }}>
+      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px', maxWidth: '720px' }}>
+        <button type="button" onClick={() => setActiveLesson(null)} className="nav-item text-xs mb-6 inline-block">{"\u2190"} BACK TO MODULES</button>
+        <div style={{ background: '#141414', border: '1px solid #262626', padding: '48px' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="tag-accent">{activeLesson.audienceLevel}</span>
+            <span className="caption-upper">{activeLesson.estimatedReadMin} MIN READ</span>
           </div>
-          <h1 className="text-title-lg uppercase font-bold text-white mb-5">{activeLesson.title}</h1>
-          <div className="text-body-sm text-text-body leading-relaxed mb-6 whitespace-pre-wrap">{activeLesson.body}</div>
+          <h4 className="mb-6">{activeLesson.title}</h4>
+          <div className="text-sm text-body leading-relaxed mb-8 whitespace-pre-wrap" style={{ fontWeight: 300 }}>{activeLesson.body}</div>
           {!activeLesson.completed ? (
-            <button type="button" onClick={() => handleComplete(activeLesson.id)} disabled={completing}
-              className="btn-primary">
+            <button type="button" onClick={() => handleComplete(activeLesson.id)} disabled={completing} className="btn-primary">
               {completing ? 'MARKING...' : 'MARK AS COMPLETE'}
             </button>
-          ) : <p className="text-sm text-emerald-400 font-bold">{"\u2713"} Completed</p>}
+          ) : <p className="text-sm text-emerald-400" style={{ fontWeight: 400 }}>{"\u2713"} COMPLETED</p>}
         </div>
       </main>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-black">
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
-        <Link href="/dashboard" className="text-xs text-text-muted hover:text-white transition-colors mb-2 inline-block uppercase tracking-[1.5px]">{"\u2190"} Dashboard</Link>
-        <h1 className="text-display-md uppercase font-bold text-white mb-1">Monetization</h1>
-        <p className="text-body-sm text-text-muted mb-6">Track earnings, manage sponsors, and learn to monetize.</p>
+    <div className="min-h-screen" style={{ background: '#000000' }}>
+      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px' }}>
+        <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
+        <p className="section-label mb-2">REVENUE</p>
+        <h3 className="mb-2">Monetization</h3>
+        <p className="text-sm text-muted mb-10" style={{ fontWeight: 300 }}>Track earnings, manage sponsors, and learn to monetize.</p>
 
         {/* Tab bar */}
-        <div className="bg-surface-soft border border-hairline p-1.5 flex gap-1 mb-8">
+        <div className="flex gap-px mb-10" style={{ background: '#262626' }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-bold uppercase tracking-[1.5px] transition-colors ${
-                tab === t.key
-                  ? 'bg-surface-card text-white border border-white'
-                  : 'text-text-muted hover:text-white'
-              }`}>
-              <span>{t.icon}</span>
-              <span className="hidden sm:inline">{t.label}</span>
+              className="flex-1 text-center transition-colors" style={{
+                background: '#000000', padding: '14px 8px',
+                borderBottom: tab === t.key ? '1px solid #ffffff' : '1px solid transparent'
+              }}>
+              <span className="nav-item" style={{ color: tab === t.key ? '#ffffff' : '#666666' }}>{t.label}</span>
             </button>
           ))}
         </div>
 
         {/* Learn tab */}
         {tab === 'learn' && (
-          <div className="space-y-6">
-            <div className="card-elevated">
+          <div>
+            {/* Overall progress */}
+            <div className="mb-8" style={{ borderBottom: '1px solid #262626', paddingBottom: '24px' }}>
               <div className="flex items-center justify-between mb-2">
-                <span className="spec-label">Overall Progress</span>
-                <span className="text-sm font-bold text-white">{overallPercent}%</span>
+                <span className="caption-upper">OVERALL PROGRESS</span>
+                <span className="text-sm text-white" style={{ fontWeight: 400 }}>{overallPercent}%</span>
               </div>
-              <div className="w-full bg-hairline h-1 overflow-hidden">
-                <div className="bg-accent h-1 transition-all duration-700" style={{ width: `${overallPercent}%` }} />
-              </div>
+              <div className="progress-track"><div className="progress-fill" style={{ width: `${overallPercent}%` }} /></div>
             </div>
-            <div className="space-y-4">
-              {modules.map((mod) => (
-                <div key={mod.id} className="card">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-base font-bold text-white uppercase">{mod.title}</h2>
-                    <span className="text-xs text-text-muted">{mod.completionPercent}%</span>
-                  </div>
-                  <div className="w-full bg-hairline h-1 mb-4 overflow-hidden">
-                    <div className="bg-accent h-1 transition-all duration-700" style={{ width: `${mod.completionPercent}%` }} />
-                  </div>
-                  <div className="space-y-1.5">
-                    {mod.lessons.map(lesson => (
-                      <button key={lesson.id} type="button" onClick={() => setActiveLesson(lesson)}
-                        className="w-full flex items-center justify-between border border-hairline bg-surface-soft px-4 py-3 text-left hover:bg-surface-card hover:border-white transition-colors">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center text-[10px] ${
-                            lesson.completed ? 'bg-accent border-accent text-white' : 'border-hairline'
-                          }`}>{lesson.completed && '\u2713'}</span>
-                          <span className="text-sm text-text-body truncate">{lesson.title}</span>
-                        </div>
-                        <span className="shrink-0 ml-2 text-xs text-text-muted">{lesson.estimatedReadMin} min</span>
-                      </button>
-                    ))}
-                  </div>
+
+            {/* Modules */}
+            {modules.map((mod) => (
+              <div key={mod.id} className="mb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <h5>{mod.title}</h5>
+                  <span className="caption-upper">{mod.completionPercent}%</span>
                 </div>
-              ))}
-            </div>
+                <div className="progress-track mb-4"><div className="progress-fill" style={{ width: `${mod.completionPercent}%` }} /></div>
+                <div>
+                  {mod.lessons.map(lesson => (
+                    <button key={lesson.id} type="button" onClick={() => setActiveLesson(lesson)}
+                      className="w-full flex items-center justify-between text-left transition-colors hover:bg-surface-card" style={{ borderBottom: '1px solid #262626', padding: '14px 0' }}>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px]" style={{
+                          border: lesson.completed ? '1.5px solid #8b5cf6' : '1.5px solid #262626',
+                          color: lesson.completed ? '#8b5cf6' : '#262626',
+                          background: lesson.completed ? 'rgba(139,92,246,0.1)' : 'transparent'
+                        }}>{lesson.completed && '\u2713'}</span>
+                        <span className="text-sm truncate" style={{ fontWeight: 300, color: lesson.completed ? '#999999' : '#ffffff' }}>{lesson.title}</span>
+                      </div>
+                      <span className="shrink-0 ml-2 caption-upper">{lesson.estimatedReadMin} MIN</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Earnings tab */}
+        {/* Placeholder tabs */}
         {tab === 'earnings' && (
-          <div className="card-elevated p-10 text-center">
-            <div className="text-4xl mb-4">{"\u{1F4B0}"}</div>
-            <h3 className="text-title-lg uppercase font-bold text-white mb-2">Earnings Tracking Coming Soon</h3>
-            <p className="text-body-sm text-text-muted max-w-md mx-auto mb-4">Connect your monetization platforms to track real earnings, affiliate revenue, and brand deal income.</p>
-            <span className="tag text-xs border-amber-500 text-amber-400">{"\u{1F6A7}"} IN DEVELOPMENT</span>
+          <div className="text-center py-16">
+            <h5 className="mb-3">Earnings tracking coming soon</h5>
+            <p className="text-sm text-muted" style={{ fontWeight: 300 }}>Connect your monetization platforms to track real earnings.</p>
+            <span className="tag mt-4 inline-block text-amber-400" style={{ borderColor: 'rgba(245,158,11,0.3)' }}>IN DEVELOPMENT</span>
           </div>
         )}
-
-        {/* Sponsors tab */}
         {tab === 'sponsors' && (
-          <div className="card-elevated p-10 text-center">
-            <div className="text-4xl mb-4">{"\u{1F91D}"}</div>
-            <h3 className="text-title-lg uppercase font-bold text-white mb-2">Sponsor Management Coming Soon</h3>
-            <p className="text-body-sm text-text-muted max-w-md mx-auto mb-4">Track brand deals, manage sponsorship pipelines, and organize your collaborations in one place.</p>
-            <span className="tag text-xs border-amber-500 text-amber-400">{"\u{1F6A7}"} IN DEVELOPMENT</span>
+          <div className="text-center py-16">
+            <h5 className="mb-3">Sponsor management coming soon</h5>
+            <p className="text-sm text-muted" style={{ fontWeight: 300 }}>Track brand deals and manage sponsorship pipelines.</p>
+            <span className="tag mt-4 inline-block text-amber-400" style={{ borderColor: 'rgba(245,158,11,0.3)' }}>IN DEVELOPMENT</span>
           </div>
         )}
-
-        {/* Payouts tab */}
         {tab === 'payouts' && (
-          <div className="card-elevated p-10 text-center">
-            <div className="text-4xl mb-4">{"\u{1F4B3}"}</div>
-            <h3 className="text-title-lg uppercase font-bold text-white mb-2">Payout History Coming Soon</h3>
-            <p className="text-body-sm text-text-muted max-w-md mx-auto mb-4">View your payout history, manage payment methods, and track pending transfers.</p>
-            <span className="tag text-xs border-amber-500 text-amber-400">{"\u{1F6A7}"} IN DEVELOPMENT</span>
+          <div className="text-center py-16">
+            <h5 className="mb-3">Payout history coming soon</h5>
+            <p className="text-sm text-muted" style={{ fontWeight: 300 }}>View payout history and manage payment methods.</p>
+            <span className="tag mt-4 inline-block text-amber-400" style={{ borderColor: 'rgba(245,158,11,0.3)' }}>IN DEVELOPMENT</span>
           </div>
         )}
       </main>

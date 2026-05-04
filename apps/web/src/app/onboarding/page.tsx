@@ -38,7 +38,6 @@ export default function OnboardingPage() {
   }, [getToken, router])
 
   function update(field: keyof OnboardingFormData, value: string) { setForm(p => ({ ...p, [field]: value })); setFieldErrors(p => { const n = { ...p }; delete n[field]; return n }) }
-
   function validateStep1() { const e: Record<string, string> = {}; if (!form.displayName.trim()) e.displayName = 'Required'; if (!form.primaryNiche) e.primaryNiche = 'Required'; setFieldErrors(e); return !Object.keys(e).length }
   function validateStep2() { const e: Record<string, string> = {}; if (!form.followerCountRange) e.followerCountRange = 'Required'; if (!form.primaryGoal) e.primaryGoal = 'Required'; setFieldErrors(e); return !Object.keys(e).length }
   function handleNext(e: FormEvent) { e.preventDefault(); if (validateStep1()) setStep(2) }
@@ -55,52 +54,97 @@ export default function OnboardingPage() {
     } catch { setError('Something went wrong.') } finally { setLoading(false) }
   }
 
-  if (fetching) return <div className="min-h-screen flex items-center justify-center bg-black"><div className="flex items-center gap-3"><span className="spinner" /><span className="text-sm text-text-muted">Loading...</span></div></div>
+  if (fetching) return <div className="min-h-screen flex items-center justify-center" style={{ background: '#000000' }}><span className="spinner" /></div>
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-black">
-      <div className="w-full max-w-lg">
-        <div className="bg-surface-card border border-hairline p-8 sm:p-10">
-          <div className="mb-6">
-            <p className="spec-label text-accent mb-2">Step {step} of {TOTAL_STEPS}</p>
-            <div className="flex gap-1 mb-5">{Array.from({ length: TOTAL_STEPS }).map((_, i) => <div key={i} className={`h-1 flex-1 transition-all duration-500 ${i < step ? 'bg-accent' : 'bg-hairline'}`} />)}</div>
-            <h1 className="text-display-sm uppercase font-bold text-white">{step === 1 ? 'Tell Us About Yourself' : 'Your Goals & Audience'}</h1>
-            <p className="text-body-sm text-text-muted mt-1">{step === 1 ? 'Help us personalise your experience.' : 'Almost done — just a couple more details.'}</p>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: '#000000' }}>
+      <div className="w-full max-w-[560px]">
+        <div style={{ background: '#141414', border: '1px solid #262626', padding: '48px' }}>
+          {/* Progress */}
+          <div className="mb-8">
+            <p className="caption-upper text-accent mb-3">STEP {step} OF {TOTAL_STEPS}</p>
+            <div className="progress-track flex gap-1">
+              {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+                <div key={i} className="flex-1 h-[2px] transition-all duration-500" style={{ background: i < step ? '#8b5cf6' : '#262626' }} />
+              ))}
+            </div>
+            <h4 className="mt-5">{step === 1 ? 'Tell us about yourself' : 'Your goals & audience'}</h4>
+            <p className="text-sm text-muted mt-2" style={{ fontWeight: 300 }}>{step === 1 ? 'Help us personalise your experience.' : 'Almost done — just a couple more details.'}</p>
           </div>
 
-          {error && <div role="alert" className="mb-5 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
+          {error && <div role="alert" className="mb-5 border border-red-500/30 px-4 py-3 text-sm text-red-400">{error}</div>}
 
           {step === 1 && (
-            <form onSubmit={handleNext} noValidate className="space-y-5">
-              <div><label htmlFor="displayName" className="label">Display name <span className="text-red-400">*</span></label><input id="displayName" type="text" value={form.displayName} onChange={e => update('displayName', e.target.value)} placeholder="e.g. Alex Rivera" className={`input ${fieldErrors.displayName ? 'border-red-500' : ''}`} />{fieldErrors.displayName && <p className="mt-1 text-xs text-red-400">{fieldErrors.displayName}</p>}</div>
-              <div><label htmlFor="primaryNiche" className="label">Primary niche <span className="text-red-400">*</span></label><select id="primaryNiche" value={form.primaryNiche} onChange={e => update('primaryNiche', e.target.value)} className={`input ${fieldErrors.primaryNiche ? 'border-red-500' : ''}`}><option value="">Select a niche...</option>{NICHES.map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}</select>{fieldErrors.primaryNiche && <p className="mt-1 text-xs text-red-400">{fieldErrors.primaryNiche}</p>}</div>
-              <div><label htmlFor="secondaryNiche" className="label">Secondary niche <span className="text-text-muted normal-case tracking-normal font-normal">(optional)</span></label><select id="secondaryNiche" value={form.secondaryNiche} onChange={e => update('secondaryNiche', e.target.value)} className="input"><option value="">None</option>{NICHES.filter(n => n !== form.primaryNiche).map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}</select></div>
+            <form onSubmit={handleNext} noValidate className="space-y-6">
+              <div>
+                <label htmlFor="displayName" className="field-label">DISPLAY NAME <span className="text-red-400">*</span></label>
+                <input id="displayName" type="text" value={form.displayName} onChange={e => update('displayName', e.target.value)} placeholder="e.g. Alex Rivera" className={`input ${fieldErrors.displayName ? 'border-b-red-500' : ''}`} />
+                {fieldErrors.displayName && <p className="mt-1 text-xs text-red-400">{fieldErrors.displayName}</p>}
+              </div>
+              <div>
+                <label htmlFor="primaryNiche" className="field-label">PRIMARY NICHE <span className="text-red-400">*</span></label>
+                <select id="primaryNiche" value={form.primaryNiche} onChange={e => update('primaryNiche', e.target.value)} className={`input ${fieldErrors.primaryNiche ? 'border-b-red-500' : ''}`}>
+                  <option value="">Select a niche...</option>
+                  {NICHES.map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}
+                </select>
+                {fieldErrors.primaryNiche && <p className="mt-1 text-xs text-red-400">{fieldErrors.primaryNiche}</p>}
+              </div>
+              <div>
+                <label htmlFor="secondaryNiche" className="field-label">SECONDARY NICHE <span className="text-muted" style={{ textTransform: 'none', letterSpacing: '0' }}>(optional)</span></label>
+                <select id="secondaryNiche" value={form.secondaryNiche} onChange={e => update('secondaryNiche', e.target.value)} className="input">
+                  <option value="">None</option>
+                  {NICHES.filter(n => n !== form.primaryNiche).map(n => <option key={n} value={n}>{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}
+                </select>
+              </div>
               <button type="submit" className="btn-primary w-full">NEXT</button>
             </form>
           )}
 
           {step === 2 && (
-            <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            <form onSubmit={handleSubmit} noValidate className="space-y-6">
               <div>
-                <label htmlFor="instagramHandle" className="label">Instagram handle <span className="text-text-muted normal-case tracking-normal font-normal">(optional)</span></label>
-                <div className="flex"><span className="inline-flex items-center px-3 border border-r-0 border-hairline bg-surface-soft text-text-muted text-sm">@</span><input id="instagramHandle" type="text" value={form.instagramHandle} onChange={e => update('instagramHandle', e.target.value)} placeholder="yourhandle" className="input flex-1" /></div>
+                <label htmlFor="instagramHandle" className="field-label">INSTAGRAM HANDLE <span className="text-muted" style={{ textTransform: 'none', letterSpacing: '0' }}>(optional)</span></label>
+                <div className="flex items-end gap-2">
+                  <span className="text-sm text-muted pb-2">@</span>
+                  <input id="instagramHandle" type="text" value={form.instagramHandle} onChange={e => update('instagramHandle', e.target.value)} placeholder="yourhandle" className="input flex-1" />
+                </div>
               </div>
               <div>
-                <label className="label">Follower range <span className="text-red-400">*</span></label>
-                <div className="grid grid-cols-2 gap-2">{FOLLOWER_RANGES.map(({ value, label }) => (
-                  <button key={value} type="button" onClick={() => update('followerCountRange', value)} className={`border px-3 py-2.5 text-sm font-bold text-left transition-colors ${form.followerCountRange === value ? 'border-accent text-accent bg-accent/10' : 'border-hairline bg-surface-soft text-text-muted hover:border-white hover:text-white'}`}>{label}</button>
-                ))}</div>
+                <label className="field-label">FOLLOWER RANGE <span className="text-red-400">*</span></label>
+                <div className="grid grid-cols-2 gap-px" style={{ background: '#262626' }}>
+                  {FOLLOWER_RANGES.map(({ value, label }) => (
+                    <button key={value} type="button" onClick={() => update('followerCountRange', value)}
+                      className="text-left transition-colors" style={{
+                        background: '#000000', padding: '20px 24px',
+                        border: form.followerCountRange === value ? '1px solid #8b5cf6' : 'none',
+                        color: form.followerCountRange === value ? '#8b5cf6' : '#999999',
+                        fontSize: '12px', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '2px'
+                      }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 {fieldErrors.followerCountRange && <p className="mt-1 text-xs text-red-400">{fieldErrors.followerCountRange}</p>}
               </div>
               <div>
-                <label className="label">Primary goal <span className="text-red-400">*</span></label>
-                <div className="space-y-2">{GOALS.map(goal => (
-                  <button key={goal} type="button" onClick={() => update('primaryGoal', goal)} className={`w-full border px-4 py-2.5 text-sm font-bold text-left transition-colors ${form.primaryGoal === goal ? 'border-accent text-accent bg-accent/10' : 'border-hairline bg-surface-soft text-text-muted hover:border-white hover:text-white'}`}>{goal}</button>
-                ))}</div>
+                <label className="field-label">PRIMARY GOAL <span className="text-red-400">*</span></label>
+                <div className="grid gap-px" style={{ background: '#262626' }}>
+                  {GOALS.map(goal => (
+                    <button key={goal} type="button" onClick={() => update('primaryGoal', goal)}
+                      className="w-full text-left transition-colors" style={{
+                        background: '#000000', padding: '20px 24px',
+                        border: form.primaryGoal === goal ? '1px solid #8b5cf6' : 'none',
+                        color: form.primaryGoal === goal ? '#8b5cf6' : '#999999',
+                        fontSize: '13px', fontWeight: 300
+                      }}>
+                      {goal}
+                    </button>
+                  ))}
+                </div>
                 {fieldErrors.primaryGoal && <p className="mt-1 text-xs text-red-400">{fieldErrors.primaryGoal}</p>}
               </div>
-              <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setStep(1)} className="btn-secondary flex-1">BACK</button>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setStep(1)} className="btn-ghost flex-1">BACK</button>
                 <button type="submit" disabled={loading} className="btn-primary flex-1">
                   {loading ? 'SAVING...' : 'FINISH SETUP'}
                 </button>

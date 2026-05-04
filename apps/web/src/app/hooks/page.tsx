@@ -49,42 +49,51 @@ export default function HooksPage() {
   const totalPages = Math.ceil(total / pageSize)
 
   return (
-    <div className="min-h-screen bg-black">
-      <main className="mx-auto max-w-4xl px-6 py-10">
-        <Link href="/dashboard" className="text-xs text-text-muted hover:text-white transition-colors mb-2 inline-block uppercase tracking-[1.5px]">{"\u2190"} Dashboard</Link>
-        <h1 className="text-display-md uppercase font-bold text-white mb-1">Hook Library</h1>
-        <p className="text-body-sm text-text-muted mb-6">Browse proven viral hooks for your reels.</p>
+    <div className="min-h-screen" style={{ background: '#000000' }}>
+      <main className="editorial-container" style={{ paddingTop: '48px', paddingBottom: '120px' }}>
+        <Link href="/dashboard" className="nav-item text-xs mb-2 inline-block">{"\u2190"} DASHBOARD</Link>
+        <p className="section-label mb-2">CONTENT LIBRARY</p>
+        <h3 className="mb-2">Hook library</h3>
+        <p className="text-sm text-muted mb-8" style={{ fontWeight: 300 }}>Browse proven viral hooks for your reels.</p>
 
-        <form onSubmit={handleSearch} className="flex gap-3 mb-5">
-          <input type="text" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search hooks..."
-            className="input flex-1" />
+        {/* Search */}
+        <form onSubmit={handleSearch} className="flex gap-4 items-end mb-6">
+          <input type="text" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search hooks..." className="input flex-1" />
           <button type="submit" className="btn-primary">SEARCH</button>
         </form>
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          <button type="button" onClick={() => { setNiche(''); setPage(1) }} className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-[1.5px] border transition-colors ${!niche ? 'border-white text-white' : 'border-hairline text-text-muted hover:text-white hover:border-white'}`}>All</button>
+        {/* Filter tabs */}
+        <div className="flex flex-wrap gap-2 mb-10">
+          <button type="button" onClick={() => { setNiche(''); setPage(1) }}
+            className={`nav-item px-3 py-1.5 ${!niche ? 'text-white' : ''}`}
+            style={{ borderBottom: !niche ? '1px solid #ffffff' : '1px solid transparent' }}>
+            ALL
+          </button>
           {NICHES.map((n) => (
-            <button key={n} type="button" onClick={() => { setNiche(n); setPage(1) }} className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-[1.5px] border transition-colors ${niche === n ? 'border-white text-white' : 'border-hairline text-text-muted hover:text-white hover:border-white'}`}>
-              {n.charAt(0).toUpperCase() + n.slice(1)}
+            <button key={n} type="button" onClick={() => { setNiche(n); setPage(1) }}
+              className={`nav-item px-3 py-1.5 ${niche === n ? 'text-white' : ''}`}
+              style={{ borderBottom: niche === n ? '1px solid #ffffff' : '1px solid transparent' }}>
+              {n.toUpperCase()}
             </button>
           ))}
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-3 justify-center py-12"><span className="spinner" /><span className="text-sm text-text-muted">Loading...</span></div>
+          <div className="flex items-center gap-3 justify-center py-12"><span className="spinner" /></div>
         ) : hooks.length === 0 ? (
-          <div className="card p-8 text-center"><p className="text-sm text-text-muted">No hooks found.</p></div>
+          <p className="text-sm text-muted text-center py-12" style={{ fontWeight: 300 }}>No hooks found.</p>
         ) : (
-          <div className="space-y-3">
+          <div>
             {hooks.map((h) => (
-              <div key={h.id} className="card flex items-start justify-between gap-3">
+              <div key={h.id} className="flex items-start justify-between gap-4" style={{ borderBottom: '1px solid #262626', padding: '20px 0' }}>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-text-body mb-2">{h.content}</p>
-                  <div className="flex flex-wrap gap-1.5">{h.niches.map((n) => <span key={n} className="tag text-xs">{n}</span>)}</div>
+                  <p className="text-sm text-body mb-2" style={{ fontWeight: 300 }}>{h.content}</p>
+                  <div className="flex flex-wrap gap-1.5">{h.niches.map((n) => <span key={n} className="tag">{n}</span>)}</div>
                 </div>
                 <button type="button" onClick={() => handleSave(h.id)} disabled={savedIds.has(h.id) || savingId === h.id}
-                  className={`shrink-0 px-3 py-1.5 text-xs font-bold uppercase tracking-[1.5px] border transition-colors ${savedIds.has(h.id) ? 'border-accent text-accent cursor-default' : 'border-white text-white hover:bg-white hover:text-black disabled:opacity-50'}`}>
-                  {savedIds.has(h.id) ? 'Saved \u2713' : savingId === h.id ? '...' : 'Save'}
+                  className={`shrink-0 ${savedIds.has(h.id) ? 'tag-accent' : 'btn-primary text-xs h-8 px-4'}`}
+                  style={savedIds.has(h.id) ? { cursor: 'default' } : {}}>
+                  {savedIds.has(h.id) ? 'SAVED' : savingId === h.id ? '...' : 'SAVE'}
                 </button>
               </div>
             ))}
@@ -92,10 +101,10 @@ export default function HooksPage() {
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 mt-8">
-            <button type="button" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="btn-secondary h-10 px-4 text-xs disabled:opacity-30">PREVIOUS</button>
-            <span className="text-xs text-text-muted">Page {page} of {totalPages}</span>
-            <button type="button" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="btn-secondary h-10 px-4 text-xs disabled:opacity-30">NEXT</button>
+          <div className="flex items-center justify-center gap-4 mt-10">
+            <button type="button" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="btn-ghost text-xs h-8 px-4 disabled:opacity-30">PREVIOUS</button>
+            <span className="caption-upper">{page} / {totalPages}</span>
+            <button type="button" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="btn-ghost text-xs h-8 px-4 disabled:opacity-30">NEXT</button>
           </div>
         )}
       </main>
