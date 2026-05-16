@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { prisma } from '@viraly/db'
 import { predictVirality } from '../lib/groq'
+import redis from '../lib/redis'
 
 const router = Router()
 
@@ -26,6 +27,18 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
     res.status(404).json({ error: 'not_found', message: 'Reel submission not found' })
     return
   }
+
+  // Check Redis cache by URL hash
+  const urlHash = Buffer.from(submission.url).toString('base64').slice(0, 40)
+  const viralityCacheKey = `virality:${urlHash}`
+  try {
+    const cached = await redis.get(viralityCacheKey)
+    if (cached) {
+      const cachedData = JSON.parse(cached)
+      res.status(200).json({ ...cachedData, cached: true })
+      return
+    }
+  } catch (err) { console.error('[virality] Cache read failed:', err) }
 
   // Call AI service for virality prediction with retry-once on failure
   // Requirement 6.6: retry once on AI provider error, then return descriptive error
@@ -91,6 +104,9 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
     suggestions: prediction.suggestions,
     createdAt: prediction.createdAt,
   })
+
+  // Cache the prediction by URL for 30 days
+  try { await redis.set(viralityCacheKey, JSON.stringify({ id: prediction.id, score: prediction.score, reachRange: { min: prediction.reachMin, max: prediction.reachMax }, breakdown: aiResult.breakdown ?? null, improvements: aiResult.improvements ?? [], howToFix: aiResult.howToFix ?? [], suggestions: prediction.suggestions }), 'EX', 2592000) } catch (err) { console.error('[virality] Cache write failed:', err) }
 })
 
 export default router

@@ -35,6 +35,18 @@ router.post('/initial', async (req: Request, res: Response): Promise<void> => {
   const idea = (req.body.idea as string)?.trim()
   if (!idea) { res.status(400).json({ error: 'bad_request', message: 'idea is required' }); return }
 
+  // Per-user daily rate limit (5 per day)
+  const todayStr = new Date().toISOString().split('T')[0]
+  const rateLimitKey = `ai:scripts:${creatorId}:${todayStr}`
+  try {
+    const currentCount = await redis.incr(rateLimitKey)
+    if (currentCount === 1) await redis.expire(rateLimitKey, 86400)
+    if (currentCount > 5) {
+      res.status(429).json({ error: 'daily_limit_reached', message: 'You have reached your 5 daily script generations. Come back tomorrow!', resetsAt: new Date(new Date().setHours(24, 0, 0, 0)).toISOString() })
+      return
+    }
+  } catch (err) { console.error('[scripts] Rate limit check failed:', err) }
+
   // Build trend context for AI prompt injection
   const trendContext = await buildTrendContext(creator.primaryNiche)
 
@@ -88,6 +100,18 @@ router.post('/more', async (req: Request, res: Response): Promise<void> => {
   const idea = (req.body.idea as string)?.trim()
   if (!idea) { res.status(400).json({ error: 'bad_request', message: 'idea is required' }); return }
 
+  // Per-user daily rate limit (5 per day)
+  const todayStr = new Date().toISOString().split('T')[0]
+  const rateLimitKey = `ai:scripts:${creatorId}:${todayStr}`
+  try {
+    const currentCount = await redis.incr(rateLimitKey)
+    if (currentCount === 1) await redis.expire(rateLimitKey, 86400)
+    if (currentCount > 5) {
+      res.status(429).json({ error: 'daily_limit_reached', message: 'You have reached your 5 daily script generations. Come back tomorrow!', resetsAt: new Date(new Date().setHours(24, 0, 0, 0)).toISOString() })
+      return
+    }
+  } catch (err) { console.error('[scripts] Rate limit check failed:', err) }
+
   // Build trend context — each of the 3 scripts should use a different cluster
   const trendContext = await buildTrendContext(creator.primaryNiche)
 
@@ -129,6 +153,13 @@ router.post('/guide', async (req: Request, res: Response): Promise<void> => {
     return
   }
 
+  // Check guide cache by creator+hook+concept
+  const guideCacheKey = `guide:${creatorId}:${Buffer.from(hook + concept).toString('base64').slice(0, 40)}`
+  try {
+    const cachedGuide = await redis.get(guideCacheKey)
+    if (cachedGuide) { res.status(200).json({ guide: JSON.parse(cachedGuide), cached: true }); return }
+  } catch (err) { console.error('[scripts/guide] Cache read failed:', err) }
+
   let guide: unknown
   try {
     guide = await generateFullGuide({ niche: creator.primaryNiche, idea: idea.trim(), hook: hook.trim(), concept: concept.trim() })
@@ -137,6 +168,9 @@ router.post('/guide', async (req: Request, res: Response): Promise<void> => {
     res.status(502).json({ error: 'ai_service_unavailable', message: 'Guide generation failed' })
     return
   }
+
+  // Cache the guide for 7 days
+  try { await redis.set(guideCacheKey, JSON.stringify(guide), 'EX', 604800) } catch (err) { console.error('[scripts/guide] Cache write failed:', err) }
 
   // Persist the guide
   const date = todayUTC()

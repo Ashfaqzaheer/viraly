@@ -17,7 +17,9 @@ async function callAI(systemPrompt: string, userPrompt: string, temperature = 0.
     throw new Error('AI_PROVIDER_KEY not configured — cannot generate content')
   }
 
-  console.log(`[groq] Calling ${AI_MODEL} | temp=${temperature} | prompt=${userPrompt.slice(0, 80)}...`)
+  console.log(`[AI] Calling Groq | model: ${AI_MODEL} | ~${Math.ceil((systemPrompt.length + userPrompt.length) / 4)} prompt tokens`)
+
+  const startTime = Date.now()
 
   const res = await fetch(AI_URL, {
     method: 'POST',
@@ -48,7 +50,7 @@ async function callAI(systemPrompt: string, userPrompt: string, temperature = 0.
   const content = data.choices?.[0]?.message?.content
   if (!content) throw new Error('Empty AI response')
 
-  console.log(`[groq] Response received | length=${content.length}`)
+  console.log(`[AI] Groq responded in ${Date.now() - startTime}ms`)
 
   try {
     return JSON.parse(stripCodeFences(content))

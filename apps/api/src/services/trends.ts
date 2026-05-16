@@ -8,7 +8,7 @@ import redis from '../lib/redis'
 const AI_PROVIDER_URL = process.env.AI_PROVIDER_URL ?? 'https://api.groq.com/openai/v1/chat/completions'
 const AI_PROVIDER_KEY = process.env.AI_PROVIDER_KEY ?? ''
 const AI_MODEL = process.env.AI_MODEL ?? 'llama-3.3-70b-versatile'
-const TREND_CACHE_TTL = 3600
+const TREND_CACHE_TTL = 21600
 const STALE_THRESHOLD_MS = 48 * 60 * 60 * 1000
 
 export interface Trend {

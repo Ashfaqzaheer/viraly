@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { prisma } from '@viraly/db'
 import { recordDailyAction } from '../services/streak'
 import { analyzeReel } from '../lib/groq'
+import redis from '../lib/redis'
 
 const router = Router()
 
@@ -75,6 +76,20 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
     data: { creatorId, url },
   })
 
+  // Check Redis cache by URL hash (same video = same analysis)
+  const urlHash = Buffer.from(url).toString('base64').slice(0, 40)
+  const reelCacheKey = `reel:analysis:${urlHash}`
+  try {
+    const cached = await redis.get(reelCacheKey)
+    if (cached) {
+      const feedback = JSON.parse(cached)
+      await prisma.reelSubmission.update({ where: { id: submission.id }, data: { feedback: feedback as any } })
+      await recordDailyAction(creatorId).catch(() => {})
+      res.status(201).json({ id: submission.id, url: submission.url, feedback, submittedAt: submission.submittedAt, cached: true })
+      return
+    }
+  } catch (err) { console.error('[reel] Cache read failed:', err) }
+
   // Call AI service for feedback
   let feedback: unknown
   try {
@@ -94,6 +109,9 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
     where: { id: submission.id },
     data: { feedback: feedback as import('@prisma/client').Prisma.InputJsonValue },
   })
+
+  // Cache the analysis by URL for 24 hours
+  try { await redis.set(reelCacheKey, JSON.stringify(feedback), 'EX', 86400) } catch (err) { console.error('[reel] Cache write failed:', err) }
 
   // Requirement 4.2: record daily streak action on reel submission
   await recordDailyAction(creatorId).catch(() => {

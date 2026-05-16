@@ -33,11 +33,13 @@ const allowedOrigins = [
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (curl, mobile, server-to-server)
+    // Allow requests with no origin (direct navigation, curl, mobile, server-to-server)
     if (!origin) return callback(null, true)
+    // Allow configured origins
     if (allowedOrigins.includes(origin)) return callback(null, true)
-    console.warn(`[CORS] Blocked origin: ${origin}`)
-    return callback(new Error('Not allowed by CORS'))
+    // Unknown origin — still allow but log (CORS headers won't be set, browser will block)
+    console.warn(`[CORS] Unknown origin: ${origin}`)
+    return callback(null, false)
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
