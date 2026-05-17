@@ -128,15 +128,30 @@ Return ONLY valid JSON:
   return await callAI(system, user, 0.6)
 }
 
-export async function analyzeReel(params: {
-  url: string
-}): Promise<Record<string, unknown>> {
-  const { url } = params
+export async function analyzeReel(params: { url: string }): Promise<Record<string, unknown>> {
+  const system = `You are a viral content analyst specializing in Instagram Reels. Respond with valid JSON only, no markdown.`
 
-  const system = `You are an expert Instagram Reels coach. Analyze the reel and provide detailed feedback across 5 dimensions.
-Return ONLY valid JSON:
-{"overallScore": 7.5, "dimensions": {"hook": {"score": 8, "feedback": "..."}, "content": {"score": 7, "feedback": "..."}, "editing": {"score": 7, "feedback": "..."}, "audio": {"score": 8, "feedback": "..."}, "cta": {"score": 6, "feedback": "..."}}, "strengths": ["..."], "improvements": ["..."], "actionItems": ["..."]}`
+  const user = `Analyze this reel and provide feedback: ${params.url}
 
-  const user = `Analyze this reel and provide coaching feedback: ${url}`
-  return await callAI(system, user, 0.6)
+Return JSON with EXACTLY this structure, no other fields:
+{
+  "score": 7.5,
+  "reachMin": 5000,
+  "reachMax": 50000,
+  "suggestions": ["suggestion1", "suggestion2", "suggestion3"],
+  "breakdown": {
+    "hookStrength": 8,
+    "retentionPotential": 7,
+    "shareability": 6,
+    "trendAlignment": 7
+  },
+  "improvements": [
+    { "problem": "specific problem", "fix": "how to fix it", "reason": "why this matters" }
+  ],
+  "howToFix": [
+    { "problem": "specific problem", "fix": "solution", "howToShoot": ["step1", "step2"], "expectedResult": "what will improve" }
+  ]
+}`
+
+  return await callAI(system, user, 0.5)
 }
