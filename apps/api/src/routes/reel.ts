@@ -28,6 +28,21 @@ export function isAllowedDomain(rawUrl: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// GET /reel/count
+// Returns the user's total submission count and limit
+// ---------------------------------------------------------------------------
+router.get('/count', async (req: Request, res: Response): Promise<void> => {
+  const creatorId = req.creator?.sub
+  if (!creatorId) {
+    res.status(401).json({ error: 'unauthorized' })
+    return
+  }
+
+  const count = await prisma.reelSubmission.count({ where: { creatorId } })
+  res.status(200).json({ count, limit: 10 })
+})
+
+// ---------------------------------------------------------------------------
 // POST /reel/submit
 // Requirements: 5.1, 5.4, 5.5, 5.6
 // ---------------------------------------------------------------------------
@@ -54,19 +69,28 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
     return
   }
 
-  // Requirement 5.6: daily submission limit — count submissions in last 24h
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  // Total submission limit: 10 per user (not per day)
   const submissionCount = await prisma.reelSubmission.count({
-    where: {
-      creatorId,
-      submittedAt: { gte: since },
-    },
+    where: { creatorId },
   })
 
   if (submissionCount >= 10) {
     res.status(429).json({
-      error: 'rate_limit_exceeded',
-      message: 'Daily submission limit of 10 reached',
+      error: 'SUBMISSION_LIMIT_REACHED',
+      message: "You've reached the 10 reel feedback limit. Delete an old submission to add a new one.",
+    })
+    return
+  }
+
+  // Duplicate URL detection: check if user already submitted this URL
+  const existingSubmission = await prisma.reelSubmission.findFirst({
+    where: { creatorId, url },
+  })
+
+  if (existingSubmission) {
+    res.status(409).json({
+      error: 'DUPLICATE_REEL',
+      message: 'This reel has already been submitted.',
     })
     return
   }
@@ -124,6 +148,35 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
     feedback,
     submittedAt: updated.submittedAt,
   })
+})
+
+// ---------------------------------------------------------------------------
+// DELETE /reel/:id
+// Deletes a submission owned by the authenticated user
+// ---------------------------------------------------------------------------
+router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+  const creatorId = req.creator?.sub
+  if (!creatorId) {
+    res.status(401).json({ error: 'unauthorized' })
+    return
+  }
+
+  const { id } = req.params
+
+  const submission = await prisma.reelSubmission.findFirst({
+    where: { id, creatorId },
+  })
+
+  if (!submission) {
+    res.status(404).json({ error: 'not_found' })
+    return
+  }
+
+  // Delete associated virality prediction first (if exists)
+  await prisma.viralityPrediction.deleteMany({ where: { reelSubmissionId: id } })
+  await prisma.reelSubmission.delete({ where: { id } })
+
+  res.status(200).json({ success: true })
 })
 
 // ---------------------------------------------------------------------------
