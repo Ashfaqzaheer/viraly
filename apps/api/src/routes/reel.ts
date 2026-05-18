@@ -78,7 +78,7 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
 
   // Check Redis cache by URL hash (same video = same analysis)
   const urlHash = Buffer.from(url).toString('base64').slice(0, 40)
-  const reelCacheKey = `reel:analysis:${urlHash}`
+  const reelCacheKey = `reel:analysis:v2:${urlHash}`
   try {
     const cached = await redis.get(reelCacheKey)
     if (cached) {
