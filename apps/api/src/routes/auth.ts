@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import { prisma } from '@viraly/db'
 import { issueTokens } from '../utils/tokens'
+import redis from '../lib/redis'
 
 const router = Router()
 
@@ -71,6 +72,23 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body as { email?: string; password?: string }
 
+  // Rate limiting: check failed login attempts
+  const loginKey = email ? `login:attempts:${email}` : null
+  if (loginKey) {
+    try {
+      const attempts = await redis.get(loginKey)
+      if (attempts && parseInt(attempts) >= 5) {
+        const ttl = await redis.ttl(loginKey)
+        res.status(429).json({
+          error: 'account_temp_locked',
+          message: 'Too many failed login attempts. Try again in 15 minutes.',
+          retryAfterSeconds: ttl > 0 ? ttl : 900
+        })
+        return
+      }
+    } catch (err) { console.error('[auth] Rate limit check failed:', err) }
+  }
+
   const start = Date.now()
 
   const invalidCredentials = async (): Promise<void> => {
@@ -96,11 +114,23 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
   const passwordMatch = await bcrypt.compare(password, creator.passwordHash)
   if (!passwordMatch) {
+    // Increment rate limit counter on failed password
+    if (loginKey) {
+      try {
+        const count = await redis.incr(loginKey)
+        if (count === 1) await redis.expire(loginKey, 900) // 15 min
+      } catch (err) { console.error('[auth] Rate limit increment failed:', err) }
+    }
     await invalidCredentials()
     return
   }
 
   const { accessToken, refreshToken } = await issueTokens(creator.id, creator.email)
+
+  // Clear rate limit counter on successful login
+  if (loginKey) {
+    try { await redis.del(loginKey) } catch {}
+  }
 
   setRefreshCookie(res, refreshToken)
 
@@ -294,6 +324,66 @@ router.get('/google/callback', async (req: Request, res: Response): Promise<void
   // Redirect to frontend callback page — the cookie is set, frontend will do a silent refresh
   const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000'
   res.redirect(`${frontendUrl}/auth/callback`)
+})
+
+// ---------------------------------------------------------------------------
+// POST /auth/forgot-password
+// ---------------------------------------------------------------------------
+router.post('/forgot-password', async (req: Request, res: Response): Promise<void> => {
+  const { email } = req.body as { email?: string }
+  if (!email) { res.status(400).json({ error: 'email_required' }); return }
+
+  // Always return success (don't reveal if email exists)
+  const creator = await prisma.creator.findUnique({ where: { email } })
+  if (!creator) {
+    res.status(200).json({ message: 'If an account exists, a reset link has been sent.' })
+    return
+  }
+
+  // Generate secure token
+  const crypto = await import('crypto')
+  const token = crypto.randomBytes(32).toString('hex')
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+  // Store in Redis (15 min expiry)
+  await redis.set(`reset:${hashedToken}`, creator.id, 'EX', 900)
+
+  // Log the reset link (in production, send email)
+  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000'
+  const resetUrl = `${frontendUrl}/reset-password?token=${token}`
+  console.log(`[auth] Password reset link for ${email}: ${resetUrl}`)
+
+  res.status(200).json({ message: 'If an account exists, a reset link has been sent.' })
+})
+
+// ---------------------------------------------------------------------------
+// POST /auth/reset-password
+// ---------------------------------------------------------------------------
+router.post('/reset-password', async (req: Request, res: Response): Promise<void> => {
+  const { token, password } = req.body as { token?: string; password?: string }
+  if (!token || !password) { res.status(400).json({ error: 'token_and_password_required' }); return }
+  if (password.length < 8) { res.status(400).json({ error: 'password_too_short', minLength: 8 }); return }
+
+  const crypto = await import('crypto')
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+  const creatorId = await redis.get(`reset:${hashedToken}`)
+  if (!creatorId) {
+    res.status(400).json({ error: 'invalid_or_expired_token', message: 'This reset link has expired or is invalid.' })
+    return
+  }
+
+  // Hash new password and update
+  const passwordHash = await bcrypt.hash(password, 12)
+  await prisma.creator.update({ where: { id: creatorId }, data: { passwordHash } })
+
+  // Invalidate token
+  await redis.del(`reset:${hashedToken}`)
+
+  // Invalidate all sessions for this user
+  await prisma.session.deleteMany({ where: { creatorId } })
+
+  res.status(200).json({ message: 'Password reset successfully. Please log in.' })
 })
 
 export default router

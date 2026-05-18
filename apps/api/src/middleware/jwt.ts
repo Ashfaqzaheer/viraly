@@ -29,6 +29,8 @@ const PUBLIC_PATHS = [
   '/auth/google',
   '/auth/google/callback',
   '/auth/google/callback/dev',
+  '/auth/forgot-password',
+  '/auth/reset-password',
   '/health',
   // /api prefixed versions (Railway production)
   '/api/auth/register',
@@ -38,6 +40,8 @@ const PUBLIC_PATHS = [
   '/api/auth/google',
   '/api/auth/google/callback',
   '/api/auth/google/callback/dev',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
   '/api/health',
 ]
 
