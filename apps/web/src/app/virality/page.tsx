@@ -11,7 +11,9 @@ interface Breakdown { hookStrength: number; retentionPotential: number; shareabi
 interface Improvement { problem: string; fix: string; reason: string }
 interface FixGuide { problem: string; fix: string; howToShoot: string[]; expectedResult: string }
 interface Prediction {
-  id: string; score: number; reachRange: { min: number; max: number }
+  id: string; score: number;
+  reachRange?: { min: number; max: number }
+  reachMin?: number; reachMax?: number
   breakdown?: Breakdown; improvements?: Improvement[]; howToFix?: FixGuide[]
   suggestions: string[]; createdAt: string
 }
@@ -100,7 +102,7 @@ export default function ViralityPage() {
                   </div>
                 </div>
                 <div className="flex-1 text-center sm:text-left">
-                  <p className="text-sm text-white/50">Reach: <span className="text-white/80 font-medium">{prediction.reachRange.min.toLocaleString()}</span> – <span className="text-white/80 font-medium">{prediction.reachRange.max.toLocaleString()}</span> views</p>
+                  <p className="text-sm text-white/50">Reach: <span className="text-white/80 font-medium">{(prediction.reachRange?.min ?? prediction.reachMin ?? 0).toLocaleString()}</span> – <span className="text-white/80 font-medium">{(prediction.reachRange?.max ?? prediction.reachMax ?? 0).toLocaleString()}</span> views</p>
                   <div className="mt-3 h-2 rounded-full bg-white/[0.06] overflow-hidden">
                     <div className={`h-full rounded-full bg-gradient-to-r ${scoreGradient(prediction.score)}`} style={{ width: `${prediction.score}%` }} />
                   </div>
