@@ -30,7 +30,7 @@ router.post('/predict/:reelSubmissionId', async (req: Request, res: Response): P
 
   // Check Redis cache by URL hash
   const urlHash = Buffer.from(submission.url).toString('base64').slice(0, 40)
-  const viralityCacheKey = `virality:${urlHash}`
+  const viralityCacheKey = `virality:v2:${urlHash}`
   try {
     const cached = await redis.get(viralityCacheKey)
     if (cached) {

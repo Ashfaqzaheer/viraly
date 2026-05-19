@@ -7,15 +7,12 @@ import { useAuth, Creator } from '@/lib/auth'
 import { apiFetch } from '@/lib/api'
 
 const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Home' },
-  { href: '/scripts', label: 'Scripts' },
-  { href: '/streak', label: 'Streak' },
-  { href: '/reels', label: 'Reels' },
-  { href: '/virality', label: 'Virality' },
-  { href: '/trends', label: 'Trends' },
-  { href: '/hooks', label: 'Hooks' },
-  { href: '/analytics', label: 'Analytics' },
-  { href: '/monetization', label: 'Monetize' },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/scripts", label: "Scripts" },
+  { href: "/trends", label: "Trends" },
+  { href: "/reels", label: "Feedback" },
+  { href: "/analytics", label: "Analytics" },
+  { href: "/streak", label: "Streak" },
 ]
 
 function getInitials(creator: Creator | null): string {
