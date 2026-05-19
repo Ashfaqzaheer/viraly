@@ -104,7 +104,7 @@ export default function OnboardingPage() {
                   {NICHES.filter(n => n !== form.primaryNiche).map(n => <option key={n} value={n} className="bg-[#12121a]">{n.charAt(0).toUpperCase() + n.slice(1)}</option>)}
                 </select>
               </div>
-              <button type="submit" className="btn-premium w-full rounded-xl px-4 py-3.5 text-sm font-semibold text-white">Next</button>
+              <div className="flex gap-3 mt-2"><button type="button" onClick={() => router.back()} aria-label="Go back" className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-3.5 text-sm font-medium text-zinc-300 hover:border-violet-500/50 hover:bg-white/10 hover:text-white transition"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>Back</button><button type="submit" className="flex-1 btn-premium rounded-xl px-4 py-3.5 text-sm font-semibold text-white">Next</button></div>
             </form>
           )}
 
