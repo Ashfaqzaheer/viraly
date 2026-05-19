@@ -124,8 +124,30 @@ export async function predictVirality(params: {
 Return ONLY valid JSON:
 {"score": 7, "reachMin": 5000, "reachMax": 25000, "suggestions": ["tip1","tip2","tip3"], "breakdown": {"hookStrength": 8, "retentionPotential": 7, "shareability": 6, "trendAlignment": 7}, "improvements": [{"problem": "...", "fix": "...", "reason": "..."}], "howToFix": [{"problem": "...", "fix": "...", "howToShoot": ["step1","step2"], "expectedResult": "..."}]}`
 
-  const user = `Analyze this reel for virality potential: ${url}`
-  return await callAI(system, user, 0.6)
+  const user = `Analyze this reel for virality potential: ${url}
+
+IMPORTANT: You must include ALL 4 breakdown scores: hookStrength, retentionPotential, shareability, trendAlignment.`
+
+  const result = await callAI(system, user, 0.6)
+
+  // Ensure breakdown always has all required keys
+  if (result.breakdown) {
+    result.breakdown = {
+      hookStrength: result.breakdown.hookStrength ?? 5,
+      retentionPotential: result.breakdown.retentionPotential ?? 5,
+      shareability: result.breakdown.shareability ?? 5,
+      trendAlignment: result.breakdown.trendAlignment ?? 5,
+    }
+  } else {
+    result.breakdown = {
+      hookStrength: 5,
+      retentionPotential: 5,
+      shareability: 5,
+      trendAlignment: 5,
+    }
+  }
+
+  return result
 }
 
 export async function analyzeReel(params: { url: string }): Promise<Record<string, unknown>> {
